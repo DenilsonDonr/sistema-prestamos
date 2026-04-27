@@ -1,4 +1,8 @@
-﻿CREATE TABLE roles (
+﻿CREATE DATABASE IF NOT EXISTS prestamo_herramientas;
+
+USE prestamo_herramientas;
+
+CREATE TABLE roles (
     id int PRIMARY KEY AUTO_INCREMENT,
     nombre varchar(50) UNIQUE NOT NULL COMMENT 'administrador, encargado_almacen, trabajador',
     descripcion varchar(255),
