@@ -31,3 +31,6 @@ pids/
 
 # Cobertura de tests
 coverage/
+
+# Archivos de build
+package-lock.json
