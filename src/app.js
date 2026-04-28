@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Rutas API (se montan aquí a medida que se implementan)
+app.use('/api/auth', require('./routes/auth.routes'));
 
 // 404 para /api — debe ir ANTES del catch-all SPA
 app.use('/api', (_req, res) => {
