@@ -9,6 +9,8 @@ const REQUIRED = [
   'DB_PORT',
   'DB_USER',
   'DB_NAME',
+  'JWT_SECRET',
+  'JWT_EXPIRES_IN',
 ];
 
 const missing = REQUIRED.filter((key) => !process.env[key]);
@@ -27,5 +29,9 @@ module.exports = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD || '',
     name: process.env.DB_NAME,
-  }
+  },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  },
 };
