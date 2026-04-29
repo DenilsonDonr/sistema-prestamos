@@ -13,6 +13,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/catalogos/marcas', require('./routes/marcas.routes'));
 app.use('/api/catalogos/modelos', require('./routes/modelos.routes'));
+app.use('/api/catalogos/areas', require('./routes/areas.routes'));
 
 // 404 para /api — debe ir ANTES del catch-all SPA
 app.use('/api', (_req, res) => {
