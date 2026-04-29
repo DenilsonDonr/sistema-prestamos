@@ -12,7 +12,7 @@ function authMiddleware(req, res, next) {
         return next(error);
     }
 
-    //Vlidar formato bearer 
+    //Validar formato bearer 
     if (!authHeader.startsWith('Bearer ')) {
         const error = new Error('Formato de token invalido');
         error.statusCode = 401;
