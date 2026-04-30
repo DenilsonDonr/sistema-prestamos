@@ -1,24 +1,26 @@
 const db = require ('../config/db');
 
+function createError(statusCode, code, message) {
+  return Object.assign(new Error(message), { statusCode, code });
+}
+
 //Función exterior
 function rbac(requiredPermission) {
 
     //Devolver el middleware
     return async function rbacMiddleware(req, res, next) {
-        //Validar que auth ya pobló req.user
-        if (!req.user || !req.user.rol_id) {
-            const error = new Error('Usuario no autenticado');
-            error.statusCode = 401;
-            error.code = 'AUTH_REQUIRED';
-            return next(error);
-        }
-        //Sacar el rol
-        const { rol_id: roleId } = req.user;
-
         try {
-            //Query de permisos
+            //Validar que auth ya pobló req.user
+            if (!req.user?.rol_id) {
+                return next(createError(401, 'AUTH_REQUIRED', 'Usuario no autenticado'));
+            }
+
+            //Sacar el rol
+            const { rol_id: roleId } = req.user;
+
+            //Verificar permisos
             const [rows] = await db.query(
-                `SELECT rp.id
+                `SELECT 1
                 FROM rol_permiso rp
                 JOIN permisos p ON rp.permiso_id = p.id
                 WHERE rp.rol_id = ? AND p.codigo = ?
@@ -27,15 +29,12 @@ function rbac(requiredPermission) {
             );
             //Si no hay permisos, error 403
             if (!rows.length) {
-                const error = new Error('No tienes permisos para realizar esta acción');
-                error.statusCode = 403;
-                error.code = 'FORBIDDEN';
-                return next (error);
+                return next(createError(403, 'FORBIDDEN', 'No tienes permisos'));
             }
-            return next();  
-        //Capturar errores de la BD   
-        } catch (err) {
-            return next(err);
+            next();  
+            //Capturar errores de la BD   
+        }   catch (err) {
+            next(err);
         }
     };
 }
