@@ -1,46 +1,44 @@
+'use strict';
+
 const { verifyToken } = require("../utils/jwt");
+
+function createError(statusCode, code, message) {
+  return Object.assign(new Error(message), { statusCode, code });
+}
 
 //Middleware de autenticación
 function authMiddleware(req, res, next) {
-    const authHeader = req.headers.authorization;
+    try{
 
-    //Validar que exista el header de autorización
-    if (!authHeader) {
-        const error = new Error ('Token de autenticación requerido');
-        error.statusCode = 401;
-        error.code = 'AUTH_TOKEN_REQUIRED';
-        return next(error);
-    }
+        const header = req.headers.authorization;
 
-    //Validar formato bearer 
-    if (!authHeader.startsWith('Bearer ')) {
-        const error = new Error('Formato de token invalido');
-        error.statusCode = 401;
-        error.code = 'AUTH_TOKEN_INVALID_FORMAT';
-        return next(error);
-    }
+        //Validar que exista el header de autorización
+         if (!header) {
+            throw createError(401, 'AUTH_TOKEN_REQUIRED', 'Token requerido');
+        }
 
-    //Extraer el token
-    const token = authHeader.split(' ')[1];
+        //Validar formato bearer 
+        if (!header.startsWith('Bearer ')) {
+            throw createError(401, 'AUTH_TOKEN_INVALID_FORMAT', 'Formato inválido');
+        }
 
-    //Validar que sí haya token
-    if (!token) {
-        const error = new Error('Token de autenticación requerido');
-        error.statusCode = 401;
-        error.code = 'AUTH_TOKEN_REQUIRED';
-        return next(error);
-    }
+        //Extraer el token
+        const token = header.split(' ')[1];
 
-    //Verificar token
-    try {
-        const decodedToken = verifyToken(token);
-        req.user = decodedToken; //Agregar el usuario decodificado al request
-        return next();
+        //Validar que sí haya token
+        if (!token) {
+        throw createError(401, 'AUTH_TOKEN_REQUIRED', 'Token requerido');
+        }
+
+        req.user = verifyToken(token);
+
+        //Verificar token
+        next();
     } catch (err) {
-        const error = new Error('Token invalido o expirado');
-        error.statusCode = 401;
-        error.code = 'AUTH_TOKEN_INVALID'; 
-        return next(error);
+        if (!err.statusCode) {
+        err = createError(401, 'AUTH_TOKEN_INVALID', 'Token inválido o expirado');
+        }
+        next(err);
     }
 }
 
