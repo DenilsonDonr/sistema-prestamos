@@ -23,7 +23,9 @@ app.use('/api/catalogos/motivos-baja', require('./routes/motivos-baja.routes'));
 app.use('/api/catalogos/tipos-alerta', require('./routes/tipos-alerta.routes'));
 app.use('/api/usuarios', require('./routes/usuarios.routes'));
 app.use('/api/proveedores', require('./routes/proveedores.routes'));
-app.use('/api/compras',    require('./routes/compras.routes'));
+app.use('/api/compras',      require('./routes/compras.routes'));
+app.use('/api/herramientas', require('./routes/herramientas.routes'));
+app.use('/api/unidades',     require('./routes/unidades.routes'));
 
 // 404 para /api — debe ir ANTES del catch-all SPA
 app.use('/api', (_req, res) => {
