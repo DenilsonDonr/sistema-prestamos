@@ -65,7 +65,7 @@ async function updateUser(id, payload, userId) {
 
   // whitelist de campos
   const allowed = [
-    'codigo','dni','nombres','apellidos',
+    'rol_id','codigo','dni','nombres','apellidos',
     'cargo_id','area_id','turno_id',
     'telefono','username','email'
   ];
@@ -151,8 +151,28 @@ async function listUsers(filters, limit, offset) {
 
 // ================= ACTIVATE / DEACTIVATE =================
 async function deactivateUser(id, userId) {
-  const [exists] = await db.query('SELECT id FROM usuarios WHERE id = ?', [id]);
-  if (!exists.length) throw error(404, 'USER_NOT_FOUND', 'Usuario no encontrado');
+  if (id === userId)
+    throw error(400, 'SELF_DEACTIVATION', 'No puedes desactivar tu propia cuenta');
+
+  const [rows] = await db.query(
+    `SELECT u.id, u.rol_id, r.nombre AS rol_nombre
+     FROM usuarios u
+     JOIN roles r ON u.rol_id = r.id
+     WHERE u.id = ?`,
+    [id]
+  );
+  if (!rows.length) throw error(404, 'USER_NOT_FOUND', 'Usuario no encontrado');
+
+  const target = rows[0];
+
+  if (target.rol_nombre === 'administrador') {
+    const [[{ cnt }]] = await db.query(
+      'SELECT COUNT(*) AS cnt FROM usuarios WHERE rol_id = ? AND activo = 1 AND id != ?',
+      [target.rol_id, id]
+    );
+    if (cnt === 0)
+      throw error(400, 'LAST_ADMIN', 'No se puede desactivar al único administrador activo del sistema');
+  }
 
   await db.query(
     'UPDATE usuarios SET activo = 0, usuario_modifica_id = ? WHERE id = ?',
