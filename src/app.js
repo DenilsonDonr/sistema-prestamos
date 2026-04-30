@@ -21,6 +21,7 @@ app.use('/api/catalogos/ubicaciones', require('./routes/ubicaciones.routes'));
 app.use('/api/catalogos/estados-herramienta', require('./routes/estados-herramienta.routes'));
 app.use('/api/catalogos/motivos-baja', require('./routes/motivos-baja.routes'));
 app.use('/api/catalogos/tipos-alerta', require('./routes/tipos-alerta.routes'));
+app.use('/api/roles',    require('./routes/roles.routes'));
 app.use('/api/usuarios', require('./routes/usuarios.routes'));
 app.use('/api/proveedores', require('./routes/proveedores.routes'));
 app.use('/api/compras',      require('./routes/compras.routes'));
