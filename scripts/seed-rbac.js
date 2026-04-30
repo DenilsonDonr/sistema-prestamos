@@ -22,6 +22,7 @@ const PERMISOS = [
   { codigo: 'usuario.ver', nombre: 'Ver usuarios', modulo: 'usuarios', descripcion: 'Consultar la lista de usuarios del sistema' },
   { codigo: 'usuario.crear', nombre: 'Crear usuarios', modulo: 'usuarios', descripcion: 'Registrar nuevos usuarios en el sistema' },
   { codigo: 'usuario.editar', nombre: 'Editar usuarios', modulo: 'usuarios', descripcion: 'Modificar datos de usuarios existentes' },
+  { codigo: 'usuario.eliminar', nombre: 'Eliminar usuarios', modulo: 'usuarios', descripcion: 'Desactivar usuarios del sistema' },
   { codigo: 'catalogo.ver', nombre: 'Ver catálogos', modulo: 'catalogos', descripcion: 'Consultar catálogos del sistema (marcas, áreas, estados, etc.)' },
   { codigo: 'catalogo.gestionar', nombre: 'Gestionar catálogos', modulo: 'catalogos', descripcion: 'Crear y editar entradas de catálogos' },
   { codigo: 'herramienta.ver', nombre: 'Ver herramientas', modulo: 'herramientas', descripcion: 'Consultar el catálogo maestro de herramientas' },
@@ -44,7 +45,7 @@ const PERMISOS = [
 // Fuente de verdad: qué permisos tiene cada rol
 const ROL_PERMISOS = {
   administrador: [
-    'usuario.ver', 'usuario.crear', 'usuario.editar',
+    'usuario.ver', 'usuario.crear', 'usuario.editar', 'usuario.eliminar',
     'catalogo.ver', 'catalogo.gestionar',
     'herramienta.ver', 'herramienta.crear', 'herramienta.editar',
     'unidad.ver',
