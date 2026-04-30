@@ -177,6 +177,8 @@ CREATE TABLE compras (
     igv decimal(12, 2) DEFAULT 0,
     total decimal(12, 2) DEFAULT 0,
     observaciones text,
+    anulada boolean DEFAULT false,
+    anulada_at TIMESTAMP NULL,
     usuario_modifica_id int,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
