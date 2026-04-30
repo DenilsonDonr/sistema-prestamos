@@ -5,7 +5,7 @@ const db = require('../config/db');
 async function getAll() {
   const [rows] = await db.query(`
     SELECT c.id, c.codigo, c.fecha_compra, c.subtotal, c.igv, c.total,
-           c.numero_documento, c.observaciones, c.created_at,
+           c.numero_documento, c.observaciones, c.anulada, c.anulada_at, c.created_at,
            p.id AS proveedor_id, p.razon_social AS proveedor_razon_social
     FROM compras c
     JOIN proveedores p ON c.proveedor_id = p.id
@@ -17,8 +17,8 @@ async function getAll() {
 async function getById(id) {
   const [compras] = await db.query(`
     SELECT c.id, c.codigo, c.fecha_compra, c.subtotal, c.igv, c.total,
-           c.numero_documento, c.observaciones, c.created_at, c.updated_at,
-           c.usuario_registra_id,
+           c.numero_documento, c.observaciones, c.anulada, c.anulada_at,
+           c.created_at, c.updated_at, c.usuario_registra_id,
            p.id AS proveedor_id, p.razon_social AS proveedor_razon_social
     FROM compras c
     JOIN proveedores p ON c.proveedor_id = p.id
