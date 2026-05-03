@@ -19,6 +19,8 @@ const AppState = {
   cargos: [],
   areas: [],
   turnos: [],
+  compras: [],
+  proveedores: [],
   deleteTarget: { type: null, id: null, name: null, onConfirm: null },
 };
 
@@ -130,6 +132,7 @@ const DashboardModule = {
 function updateBadges() {
   setText('badge-usuarios', AppState.usuarios.length);
   setText('badge-herramientas', AppState.herramientas.length);
+  setText('badge-compras', AppState.compras.length);
 }
 
 /* ════════════════════════════════════════════

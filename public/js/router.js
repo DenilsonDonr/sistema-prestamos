@@ -28,7 +28,12 @@ const ROUTES = {
         title: 'Herramientas',
         view: '/views/herramientas.html',
         module: () => HerramientasModule,
-    }
+    },
+    compras: {
+        title: 'Compras',
+        view: '/views/compras.html',
+        module: () => ComprasModule,
+    },
 };
 
 /* ════════════════════════════════════════════
