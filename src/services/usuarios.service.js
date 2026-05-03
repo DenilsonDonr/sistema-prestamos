@@ -42,9 +42,46 @@ async function createUser(payload, userId) {
 // ================= UPDATE =================
 async function updateUser(id, payload, userId) {
 
-  // verificar existencia
-  const [exists] = await db.query('SELECT id FROM usuarios WHERE id = ?', [id]);
+  // verificar existencia + traer rol actual para reglas de auto-protección
+  const [exists] = await db.query(
+    `SELECT u.id, u.rol_id, r.nombre AS rol_nombre
+     FROM usuarios u
+     JOIN roles r ON u.rol_id = r.id
+     WHERE u.id = ?`,
+    [id]
+  );
   if (!exists.length) throw error(404, 'USER_NOT_FOUND', 'Usuario no encontrado');
+  const target = exists[0];
+
+  const isSelfEdit = Number(id) === Number(userId);
+  const wantsRolChange =
+    payload.rol_id !== undefined &&
+    payload.rol_id !== null &&
+    Number(payload.rol_id) !== Number(target.rol_id);
+
+  // Regla: nadie puede cambiar su propio rol (db.md §14)
+  if (isSelfEdit && wantsRolChange) {
+    throw error(
+      400,
+      'SELF_ROLE_CHANGE',
+      'No puedes cambiar tu propio rol. Pide a otro administrador que lo haga.'
+    );
+  }
+
+  // Regla: no dejar al sistema sin administrador activo al cambiar rol del último admin
+  if (!isSelfEdit && wantsRolChange && target.rol_nombre === 'administrador') {
+    const [[{ cnt }]] = await db.query(
+      'SELECT COUNT(*) AS cnt FROM usuarios WHERE rol_id = ? AND activo = 1 AND id != ?',
+      [target.rol_id, id]
+    );
+    if (cnt === 0) {
+      throw error(
+        400,
+        'LAST_ADMIN',
+        'No se puede cambiar el rol del único administrador activo del sistema'
+      );
+    }
+  }
 
   // validar duplicados si cambian
   if (payload.username) {
@@ -95,7 +132,11 @@ async function updateUser(id, payload, userId) {
     values
   );
 
-  return { id };
+  // requires_relogin: si el usuario cambió su propio password, su token sigue siendo
+  // criptográficamente válido pero la sesión debe rotarse. El frontend lo usa para forzar logout.
+  const requires_relogin = isSelfEdit && !!payload.password;
+
+  return { id, requires_relogin };
 }
 
 // ================= GET =================
