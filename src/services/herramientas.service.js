@@ -2,18 +2,33 @@
 
 const db = require('../config/db');
 
+// LEFT JOINs: los FKs son nullable en el schema; un INNER JOIN ocultaría
+// herramientas creadas sin tipo/marca/modelo/ubicación asignados.
+// stock_disponible se calcula inline para evitar N+1 en el listado.
 const SELECT = `
   SELECT h.id, h.codigo, h.nombre, h.descripcion, h.stock_minimo, h.activo,
          h.created_at, h.updated_at,
-         t.id AS tipo_id,       t.nombre AS tipo_nombre,
-         m.id AS marca_id,      m.nombre AS marca_nombre,
-         mo.id AS modelo_id,    mo.nombre AS modelo_nombre,
-         u.id AS ubicacion_id,  u.nombre AS ubicacion_nombre
+         h.tipo_id,      t.nombre  AS tipo_nombre,
+         h.marca_id,     m.nombre  AS marca_nombre,
+         h.modelo_id,    mo.nombre AS modelo_nombre,
+         h.ubicacion_id, u.nombre  AS ubicacion_nombre,
+         (
+           SELECT COUNT(*)
+           FROM unidades_herramienta uh
+           JOIN estados_herramienta e ON uh.estado_id = e.id
+           WHERE uh.herramienta_id = h.id
+             AND e.nombre IN ('bueno','regular')
+             AND uh.id NOT IN (
+               SELECT unidad_herramienta_id
+               FROM detalle_prestamos
+               WHERE devuelto = false
+             )
+         ) AS stock_disponible
   FROM herramientas h
-  JOIN tipos_herramienta t  ON h.tipo_id      = t.id
-  JOIN marcas m             ON h.marca_id     = m.id
-  JOIN modelos mo           ON h.modelo_id    = mo.id
-  JOIN ubicaciones u        ON h.ubicacion_id = u.id
+  LEFT JOIN tipos_herramienta t  ON h.tipo_id      = t.id
+  LEFT JOIN marcas m             ON h.marca_id     = m.id
+  LEFT JOIN modelos mo           ON h.modelo_id    = mo.id
+  LEFT JOIN ubicaciones u        ON h.ubicacion_id = u.id
 `;
 
 async function calcularStock(herramientaId) {
@@ -123,9 +138,9 @@ async function remove(id, usuarioModificaId) {
 // Verifica que los IDs de FK enviados existan en sus tablas
 async function verificarFKs(fields) {
   const checks = [
-    { campo: 'tipo_id',      tabla: 'tipos_herramienta' },
-    { campo: 'marca_id',     tabla: 'marcas' },
-    { campo: 'modelo_id',    tabla: 'modelos' },
+    { campo: 'tipo_id', tabla: 'tipos_herramienta' },
+    { campo: 'marca_id', tabla: 'marcas' },
+    { campo: 'modelo_id', tabla: 'modelos' },
     { campo: 'ubicacion_id', tabla: 'ubicaciones' },
   ];
 
