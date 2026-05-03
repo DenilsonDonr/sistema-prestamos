@@ -1134,3 +1134,415 @@ a {
         font-size: 20px;
     }
 }
+
+/* ══════════════════════════════════════════
+   USUARIOS — AVISOS Y MARCAS DE REGLA
+══════════════════════════════════════════ */
+
+.rules-bar {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: linear-gradient(180deg, rgba(99, 102, 241, .08), rgba(99, 102, 241, .03));
+    border: 1px solid rgba(99, 102, 241, .25);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 18px;
+}
+
+.rules-bar-icon {
+    color: var(--primary);
+    font-size: 22px;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.rules-bar-title {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    font-size: 13.5px;
+}
+
+.rules-bar-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.rules-bar-list li + li {
+    margin-top: 2px;
+}
+
+/* Avisos contextuales dentro del modal */
+.self-edit-notice,
+.last-admin-notice {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    margin-bottom: 14px;
+}
+
+.self-edit-notice {
+    background: rgba(99, 102, 241, .1);
+    border: 1px solid rgba(99, 102, 241, .25);
+    color: #3730a3;
+}
+
+.last-admin-notice {
+    background: rgba(245, 158, 11, .12);
+    border: 1px solid rgba(245, 158, 11, .35);
+    color: #92400e;
+}
+
+.self-edit-notice i,
+.last-admin-notice i {
+    font-size: 18px;
+    margin-top: 1px;
+}
+
+/* Fila propia destacada en la tabla */
+.row-self {
+    background: rgba(99, 102, 241, .04);
+}
+
+.row-self td:first-child {
+    box-shadow: inset 3px 0 0 var(--primary);
+}
+
+/* Tag pequeño "tú" junto al nombre */
+.self-tag {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/* Tag "único admin" */
+.last-admin-tag {
+    display: inline-block;
+    background: rgba(245, 158, 11, .15);
+    color: #92400e;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.last-admin-tag i {
+    font-size: 10px;
+    margin-right: 2px;
+}
+
+/* Pista de campo bloqueado */
+.lock-hint {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    padding: 1px 7px;
+    border-radius: 999px;
+    margin-left: 6px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.lock-hint i {
+    font-size: 10px;
+    margin-right: 2px;
+}
+
+.input-locked {
+    background: var(--surface-2) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed;
+}
+
+/* Texto de ayuda debajo del input (no es error) */
+.field-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* ══════════════════════════════════════════
+   AUTH GATE — controla qué se ve en carga inicial
+   sin ningún flash ni parpadeo.
+
+   Estado por defecto (sin clase en <html>):
+     • overlay visible  → el usuario no está autenticado
+     • SPA shell oculto → no hay contenido que "parpadee"
+
+   Con html.has-token (añadida por el script síncrono de <head>):
+     • overlay oculto  → el usuario tiene sesión
+     • SPA shell visible
+
+   Las transiciones solo se activan en login/logout
+   (cuando el estado CAMBIA), nunca en la carga inicial,
+   para evitar cualquier flash o animación innecesaria.
+══════════════════════════════════════════ */
+
+/* SPA shell: oculto por defecto */
+.sidebar,
+.main-content {
+    visibility: hidden;
+}
+
+/* Con token válido: mostrar SPA, sin transición (carga inicial) */
+html.has-token .sidebar,
+html.has-token .main-content {
+    visibility: visible;
+}
+
+/* ══ LOGIN OVERLAY ══════════════════════ */
+.login-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: #0f1117;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Visible por defecto */
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Oculto cuando hay token */
+html.has-token .login-overlay {
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* La clase .animating activa las transiciones solo al hacer login/logout */
+.login-overlay.animating {
+    transition: opacity .22s ease, visibility .22s ease;
+}
+
+html.has-token.animating .sidebar,
+html.has-token.animating .main-content {
+    animation: fadeInShell .18s ease forwards;
+}
+
+@keyframes fadeInShell {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Brillo decorativo de fondo */
+.bg-glow-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.bg-glow-overlay::before {
+    content: '';
+    position: absolute;
+    top: -220px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(99,102,241,.16) 0%, transparent 70%);
+}
+
+/* Card del formulario */
+.login-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px 36px;
+    background: #1a1d27;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.45);
+    margin: 16px;
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.login-brand-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(99,102,241,.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #818cf8;
+    font-size: 22px;
+}
+
+.login-brand-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.login-brand-sub {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.login-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 6px;
+}
+
+.login-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 28px;
+}
+
+/* Alerta de error */
+.login-alert {
+    display: none;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(239,68,68,.1);
+    border: 1px solid rgba(239,68,68,.28);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #fca5a5;
+    margin-bottom: 18px;
+}
+
+.login-alert.show { display: flex; }
+
+.login-alert i {
+    font-size: 17px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* Grupo de campo */
+.form-group-login { margin-bottom: 18px; }
+
+.login-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 7px;
+}
+
+.login-input-wrap { position: relative; }
+
+.login-input-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #475569;
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.login-input {
+    width: 100%;
+    background: #22263a;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    color: #f1f5f9;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 11px 14px 11px 40px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.login-input::placeholder { color: #334155; }
+
+.login-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,.2);
+}
+
+.login-input.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239,68,68,.15);
+}
+
+.login-eye-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #475569;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color .15s;
+}
+
+.login-eye-btn:hover { color: #94a3b8; }
+
+.login-field-error {
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 5px;
+    min-height: 16px;
+}
+
+/* Botón de submit */
+.btn-login-submit {
+    width: 100%;
+    padding: 12px;
+    background: #6366f1;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .2s, transform .1s;
+    margin-top: 4px;
+}
+
+.btn-login-submit:hover:not(:disabled) { background: #4f46e5; }
+.btn-login-submit:active:not(:disabled) { transform: scale(.98); }
+.btn-login-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+.login-footer-note {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 11.5px;
+    color: #1e293b;
+}

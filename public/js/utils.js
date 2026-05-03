@@ -8,13 +8,19 @@
 /* ════════════════════════════════════════════
    AUTH HELPERS
 ════════════════════════════════════════════ */
-const _DEV_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xfaWQiOjEsInJvbF9ub21icmUiOiJhZG1pbmlzdHJhZG9yIiwiaWF0IjoxNzc3NTg0NTI3LCJleHAiOjE3Nzc2MTMzMjd9.PN2PVmtoNysOounGTNtVdXm7Djv94Ou3vifS231ucAY';
-
 function getToken() {
-    return localStorage.getItem('token') || _DEV_TOKEN;
+    return localStorage.getItem('token');
 }
 
+/**
+ * Lee el payload del JWT (rápido, no autoritativo). Para el rol/permisos
+ * vigentes usar Auth.me() que se actualiza desde /api/auth/me.
+ */
 function getCurrentUser() {
+    if (Auth.state.me?.user) {
+        const u = Auth.state.me.user;
+        return { id: u.id, rol_id: u.rol_id, rol_nombre: u.rol_nombre };
+    }
     const token = getToken();
     if (!token) return null;
     try {
@@ -26,6 +32,56 @@ function getCurrentUser() {
 }
 
 /* ════════════════════════════════════════════
+   AUTH MODULE
+   Mantiene el perfil + permisos del usuario autenticado, sincronizados
+   con BD en cada navegación. La fuente de verdad NO es el JWT.
+════════════════════════════════════════════ */
+const Auth = {
+    state: {
+        me: null,           // { user, permisos }
+        loaded: false,
+    },
+
+    async refresh() {
+        try {
+            const r = await http('/api/auth/me');
+            this.state.me = r.data;
+            this.state.loaded = true;
+            return this.state.me;
+        } catch (e) {
+            this.state.me = null;
+            this.state.loaded = false;
+            throw e;
+        }
+    },
+
+    hasPermission(code) {
+        const perms = this.state.me?.permisos;
+        if (!Array.isArray(perms)) return false;
+        return perms.includes(code);
+    },
+
+    isSelf(userId) {
+        const me = this.state.me?.user;
+        return me ? Number(me.id) === Number(userId) : false;
+    },
+
+    rolNombre() {
+        return this.state.me?.user?.rol_nombre ?? null;
+    },
+
+    forceLogout(reason) {
+        localStorage.removeItem('token');
+        this.state.me = null;
+        this.state.loaded = false;
+        if (reason) try { showToast(reason, 'info'); } catch { /* */ }
+        if (typeof LoginOverlay !== 'undefined') {
+            setTimeout(() => LoginOverlay.show(), reason ? 900 : 0);
+        }
+    },
+};
+
+/* ════════════════════════════════════════════
    HTTP HELPER
 ════════════════════════════════════════════ */
 async function http(url, method = 'GET', body = null) {
@@ -34,8 +90,18 @@ async function http(url, method = 'GET', body = null) {
     if (token) opts.headers['Authorization'] = `Bearer ${token}`;
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || data.message || `Error ${res.status}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        const code = data?.error?.code;
+        // 401: token inválido, expirado, o cuenta desactivada → cerrar sesión
+        if (res.status === 401) {
+            Auth.forceLogout(data?.error?.message);
+        }
+        const err = new Error(data?.error?.message || data?.message || `Error ${res.status}`);
+        err.status = res.status;
+        err.code = code;
+        throw err;
+    }
     return data;
 }
 
