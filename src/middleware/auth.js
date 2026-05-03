@@ -1,42 +1,67 @@
 'use strict';
 
-const { verifyToken } = require("../utils/jwt");
+const { verifyToken } = require('../utils/jwt');
+const db = require('../config/db');
 
 function createError(statusCode, code, message) {
-  return Object.assign(new Error(message), { statusCode, code });
+    return Object.assign(new Error(message), { statusCode, code });
 }
 
-//Middleware de autenticación
-function authMiddleware(req, res, next) {
-    try{
-
+// Releemos rol_id y activo desde BD en cada request en lugar de confiar en el JWT.
+// Razón: si a un usuario se le cambia el rol o se le desactiva durante una sesión
+// activa, el JWT seguiría siendo válido hasta su expiración. Releer evita ventanas
+// de privilegio obsoleto.
+async function authMiddleware(req, res, next) {
+    try {
         const header = req.headers.authorization;
 
-        //Validar que exista el header de autorización
-         if (!header) {
+        if (!header) {
             throw createError(401, 'AUTH_TOKEN_REQUIRED', 'Token requerido');
         }
-
-        //Validar formato bearer 
         if (!header.startsWith('Bearer ')) {
             throw createError(401, 'AUTH_TOKEN_INVALID_FORMAT', 'Formato inválido');
         }
 
-        //Extraer el token
         const token = header.split(' ')[1];
-
-        //Validar que sí haya token
         if (!token) {
-        throw createError(401, 'AUTH_TOKEN_REQUIRED', 'Token requerido');
+            throw createError(401, 'AUTH_TOKEN_REQUIRED', 'Token requerido');
         }
 
-        req.user = verifyToken(token);
+        let payload;
+        try {
+            payload = verifyToken(token);
+        } catch {
+            throw createError(401, 'AUTH_TOKEN_INVALID', 'Token inválido o expirado');
+        }
 
-        //Verificar token
+        const [rows] = await db.query(
+            `SELECT u.id, u.activo, u.rol_id, r.nombre AS rol_nombre
+             FROM usuarios u
+             JOIN roles r ON u.rol_id = r.id
+             WHERE u.id = ?`,
+            [payload.user_id]
+        );
+
+        if (!rows.length) {
+            throw createError(401, 'USER_NOT_FOUND', 'Usuario no encontrado');
+        }
+
+        const user = rows[0];
+
+        if (!user.activo) {
+            throw createError(401, 'USER_INACTIVE', 'Tu cuenta fue desactivada');
+        }
+
+        req.user = {
+            user_id: user.id,
+            rol_id: user.rol_id,
+            rol_nombre: user.rol_nombre,
+        };
+
         next();
     } catch (err) {
         if (!err.statusCode) {
-        err = createError(401, 'AUTH_TOKEN_INVALID', 'Token inválido o expirado');
+            err = createError(401, 'AUTH_TOKEN_INVALID', 'Token inválido o expirado');
         }
         next(err);
     }
