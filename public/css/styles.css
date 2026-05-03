@@ -927,6 +927,69 @@ a {
     margin-top: 4px;
 }
 
+
+.field-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 5px;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.field-hint i {
+    margin-top: 1px;
+    flex-shrink: 0;
+    opacity: .7;
+}
+
+.stock-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.stock-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.info-banner {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: var(--radius-xs);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #0369a1;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+}
+
+.info-banner i {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.font-mono {
+    font-family: var(--font-mono, 'DM Mono', 'Courier New', monospace);
+    font-size: 12px;
+}
+
+.badge-estado {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
 /* ══════════════════════════════════════════
    DASHBOARD - TABLA RECIENTES
 ══════════════════════════════════════════ */
@@ -1172,7 +1235,7 @@ a {
     line-height: 1.55;
 }
 
-.rules-bar-list li + li {
+.rules-bar-list li+li {
     margin-top: 2px;
 }
 
@@ -1340,8 +1403,13 @@ html.has-token.animating .main-content {
 }
 
 @keyframes fadeInShell {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Brillo decorativo de fondo */
@@ -1360,7 +1428,7 @@ html.has-token.animating .main-content {
     transform: translateX(-50%);
     width: 700px;
     height: 700px;
-    background: radial-gradient(circle, rgba(99,102,241,.16) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(99, 102, 241, .16) 0%, transparent 70%);
 }
 
 /* Card del formulario */
@@ -1371,9 +1439,9 @@ html.has-token.animating .main-content {
     max-width: 420px;
     padding: 40px 36px;
     background: #1a1d27;
-    border: 1px solid rgba(255,255,255,.08);
+    border: 1px solid rgba(255, 255, 255, .08);
     border-radius: 16px;
-    box-shadow: 0 24px 64px rgba(0,0,0,.45);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, .45);
     margin: 16px;
 }
 
@@ -1387,7 +1455,7 @@ html.has-token.animating .main-content {
 .login-brand-icon {
     width: 44px;
     height: 44px;
-    background: rgba(99,102,241,.15);
+    background: rgba(99, 102, 241, .15);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -1425,8 +1493,8 @@ html.has-token.animating .main-content {
     display: none;
     align-items: flex-start;
     gap: 10px;
-    background: rgba(239,68,68,.1);
-    border: 1px solid rgba(239,68,68,.28);
+    background: rgba(239, 68, 68, .1);
+    border: 1px solid rgba(239, 68, 68, .28);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 13px;
@@ -1434,7 +1502,9 @@ html.has-token.animating .main-content {
     margin-bottom: 18px;
 }
 
-.login-alert.show { display: flex; }
+.login-alert.show {
+    display: flex;
+}
 
 .login-alert i {
     font-size: 17px;
@@ -1443,7 +1513,9 @@ html.has-token.animating .main-content {
 }
 
 /* Grupo de campo */
-.form-group-login { margin-bottom: 18px; }
+.form-group-login {
+    margin-bottom: 18px;
+}
 
 .login-label {
     display: block;
@@ -1455,7 +1527,9 @@ html.has-token.animating .main-content {
     margin-bottom: 7px;
 }
 
-.login-input-wrap { position: relative; }
+.login-input-wrap {
+    position: relative;
+}
 
 .login-input-icon {
     position: absolute;
@@ -1470,7 +1544,7 @@ html.has-token.animating .main-content {
 .login-input {
     width: 100%;
     background: #22263a;
-    border: 1px solid rgba(255,255,255,.08);
+    border: 1px solid rgba(255, 255, 255, .08);
     border-radius: 10px;
     color: #f1f5f9;
     font-family: inherit;
@@ -1480,16 +1554,18 @@ html.has-token.animating .main-content {
     transition: border-color .2s, box-shadow .2s;
 }
 
-.login-input::placeholder { color: #334155; }
+.login-input::placeholder {
+    color: #334155;
+}
 
 .login-input:focus {
     border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99,102,241,.2);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .2);
 }
 
 .login-input.is-invalid {
     border-color: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239,68,68,.15);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, .15);
 }
 
 .login-eye-btn {
@@ -1507,7 +1583,9 @@ html.has-token.animating .main-content {
     transition: color .15s;
 }
 
-.login-eye-btn:hover { color: #94a3b8; }
+.login-eye-btn:hover {
+    color: #94a3b8;
+}
 
 .login-field-error {
     font-size: 12px;
@@ -1536,9 +1614,18 @@ html.has-token.animating .main-content {
     margin-top: 4px;
 }
 
-.btn-login-submit:hover:not(:disabled) { background: #4f46e5; }
-.btn-login-submit:active:not(:disabled) { transform: scale(.98); }
-.btn-login-submit:disabled { opacity: .6; cursor: not-allowed; }
+.btn-login-submit:hover:not(:disabled) {
+    background: #4f46e5;
+}
+
+.btn-login-submit:active:not(:disabled) {
+    transform: scale(.98);
+}
+
+.btn-login-submit:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
 
 .login-footer-note {
     margin-top: 24px;

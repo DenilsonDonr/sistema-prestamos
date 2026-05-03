@@ -62,6 +62,11 @@
                 <span>Usuarios</span>
                 <span class="nav-badge" id="badge-usuarios">0</span>
             </a>
+            <a href="#" class="nav-item" data-page="herramientas">
+                <i class="bi bi-tools"></i>
+                <span>Herramientas</span>
+                <span class="nav-badge" id="badge-herramientas">0</span>
+            </a>
         </nav>
 
         <div class="sidebar-footer">
@@ -143,8 +148,7 @@
                     <label class="login-label" for="loginUsername">Usuario</label>
                     <div class="login-input-wrap">
                         <i class="bi bi-person login-input-icon"></i>
-                        <input type="text" id="loginUsername" class="login-input"
-                            placeholder="Tu nombre de usuario"
+                        <input type="text" id="loginUsername" class="login-input" placeholder="Tu nombre de usuario"
                             maxlength="50" autocomplete="username" />
                     </div>
                     <div class="login-field-error" id="err-loginUsername"></div>
@@ -154,8 +158,7 @@
                     <label class="login-label" for="loginPassword">Contraseña</label>
                     <div class="login-input-wrap">
                         <i class="bi bi-lock login-input-icon"></i>
-                        <input type="password" id="loginPassword" class="login-input"
-                            placeholder="Tu contraseña"
+                        <input type="password" id="loginPassword" class="login-input" placeholder="Tu contraseña"
                             maxlength="100" autocomplete="current-password" />
                         <button type="button" id="btnTogglePassword" class="login-eye-btn" tabindex="-1">
                             <i class="bi bi-eye" id="eyeIcon"></i>
@@ -166,7 +169,9 @@
 
                 <button type="submit" class="btn-login-submit" id="btnLogin">
                     <span id="btnLoginContent"><i class="bi bi-box-arrow-in-right"></i> Ingresar</span>
-                    <span id="btnLoginSpinner" class="d-none"><div class="spinner-sm"></div></span>
+                    <span id="btnLoginSpinner" class="d-none">
+                        <div class="spinner-sm"></div>
+                    </span>
                 </button>
             </form>
 
@@ -181,6 +186,7 @@
     <script src="js/modules/login.js"></script>
     <script src="js/router.js"></script>
     <script src="js/modules/usuarios.js"></script>
+    <script src="js/modules/herramientas.js"></script>
     <script src="js/app.js"></script>
 </body>
 
