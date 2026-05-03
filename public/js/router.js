@@ -15,15 +15,20 @@
 ════════════════════════════════════════════ */
 const ROUTES = {
     dashboard: {
-        title:  'Dashboard',
-        view:   '/views/dashboard.html',
+        title: 'Dashboard',
+        view: '/views/dashboard.html',
         module: () => DashboardModule,
     },
     usuarios: {
-        title:  'Usuarios',
-        view:   '/views/usuarios.html',
+        title: 'Usuarios',
+        view: '/views/usuarios.html',
         module: () => UsuariosModule,
     },
+    herramientas: {
+        title: 'Herramientas',
+        view: '/views/herramientas.html',
+        module: () => HerramientasModule,
+    }
 };
 
 /* ════════════════════════════════════════════

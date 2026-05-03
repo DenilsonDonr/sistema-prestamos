@@ -8,12 +8,18 @@
    ESTADO GLOBAL COMPARTIDO
 ════════════════════════════════════════════ */
 const AppState = {
-    usuarios:  [],
-    roles:     [],
-    cargos:    [],
-    areas:     [],
-    turnos:    [],
-    deleteTarget: { type: null, id: null, name: null, onConfirm: null },
+  usuarios: [],
+  herramientas: [],
+  tiposHerramienta: [],
+  marcas: [],
+  ubicaciones: [],
+  estadosHerramienta: [],
+  modelos: [],
+  roles: [],
+  cargos: [],
+  areas: [],
+  turnos: [],
+  deleteTarget: { type: null, id: null, name: null, onConfirm: null },
 };
 
 /* ════════════════════════════════════════════
@@ -21,8 +27,8 @@ const AppState = {
 ════════════════════════════════════════════ */
 const DeleteModal = {
 
-    render() {
-        document.getElementById('modalsContainer').innerHTML = `
+  render() {
+    document.getElementById('modalsContainer').innerHTML = `
       <div class="modal-overlay" id="modalDeleteOverlay">
         <div class="modal-panel modal-sm">
           <div class="modal-header-custom">
@@ -46,65 +52,65 @@ const DeleteModal = {
         </div>
       </div>`;
 
-        document.getElementById('btnConfirmDelete').addEventListener('click', () => this._execute());
-        document.getElementById('btnCancelDelete').addEventListener('click',  () => closeOverlay('modalDeleteOverlay'));
-        document.getElementById('btnCloseDelete').addEventListener('click',   () => closeOverlay('modalDeleteOverlay'));
-        document.getElementById('modalDeleteOverlay').addEventListener('click', e => {
-            if (e.target.id === 'modalDeleteOverlay') closeOverlay('modalDeleteOverlay');
-        });
-    },
+    document.getElementById('btnConfirmDelete').addEventListener('click', () => this._execute());
+    document.getElementById('btnCancelDelete').addEventListener('click', () => closeOverlay('modalDeleteOverlay'));
+    document.getElementById('btnCloseDelete').addEventListener('click', () => closeOverlay('modalDeleteOverlay'));
+    document.getElementById('modalDeleteOverlay').addEventListener('click', e => {
+      if (e.target.id === 'modalDeleteOverlay') closeOverlay('modalDeleteOverlay');
+    });
+  },
 
-    open(type, id, name, onConfirm) {
-        AppState.deleteTarget = { type, id, name, onConfirm };
+  open(type, id, name, onConfirm) {
+    AppState.deleteTarget = { type, id, name, onConfirm };
 
-        const config = {
-            desactivar: {
-                title:   'Confirmar desactivación',
-                msg:     `¿Desactivar a "<strong>${escapeHtml(name)}</strong>"? Perderá acceso al sistema hasta que sea reactivado.`,
-                icon:    'bi-person-slash',
-                label:   'Desactivar',
-                btnCls:  'btn-danger-action',
-            },
-            activar: {
-                title:   'Confirmar activación',
-                msg:     `¿Activar a "<strong>${escapeHtml(name)}</strong>"? Recuperará acceso al sistema.`,
-                icon:    'bi-person-check',
-                label:   'Activar',
-                btnCls:  'btn-primary-action',
-            },
-        };
+    const config = {
+      desactivar: {
+        title: 'Confirmar desactivación',
+        msg: `¿Desactivar a "<strong>${escapeHtml(name)}</strong>"? Perderá acceso al sistema hasta que sea reactivado.`,
+        icon: 'bi-person-slash',
+        label: 'Desactivar',
+        btnCls: 'btn-danger-action',
+      },
+      activar: {
+        title: 'Confirmar activación',
+        msg: `¿Activar a "<strong>${escapeHtml(name)}</strong>"? Recuperará acceso al sistema.`,
+        icon: 'bi-person-check',
+        label: 'Activar',
+        btnCls: 'btn-primary-action',
+      },
+    };
 
-        const def = config[type] ?? {
-            title:   'Confirmar eliminación',
-            msg:     `¿Eliminar "<strong>${escapeHtml(name)}</strong>"? Esta acción no se puede deshacer.`,
-            icon:    'bi-trash3-fill',
-            label:   'Eliminar',
-            btnCls:  'btn-danger-action',
-        };
+    const def = config[type] ?? {
+      title: 'Confirmar eliminación',
+      msg: `¿Eliminar "<strong>${escapeHtml(name)}</strong>"? Esta acción no se puede deshacer.`,
+      icon: 'bi-trash3-fill',
+      label: 'Eliminar',
+      btnCls: 'btn-danger-action',
+    };
 
-        const btn = document.getElementById('btnConfirmDelete');
-        btn.className = def.btnCls;
-        document.getElementById('deleteModalTitle').innerHTML    = `<i class="bi bi-exclamation-triangle-fill me-2"></i>${def.title}`;
-        document.getElementById('deleteMessage').innerHTML       = def.msg;
-        document.getElementById('deleteConfirmIcon').className   = `bi ${def.icon} me-1`;
-        document.getElementById('deleteConfirmLabel').textContent = def.label;
+    const btn = document.getElementById('btnConfirmDelete');
+    btn.className = def.btnCls;
+    document.getElementById('deleteModalTitle').innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i>${def.title}`;
+    document.getElementById('deleteMessage').innerHTML = def.msg;
+    document.getElementById('deleteConfirmIcon').className = `bi ${def.icon} me-1`;
+    document.getElementById('deleteConfirmLabel').textContent = def.label;
 
-        openOverlay('modalDeleteOverlay');
-    },
+    openOverlay('modalDeleteOverlay');
+  },
 
-    async _execute() {
-        const { onConfirm } = AppState.deleteTarget;
-        closeOverlay('modalDeleteOverlay');
-        if (typeof onConfirm === 'function') await onConfirm();
-    },
+  async _execute() {
+    const { onConfirm } = AppState.deleteTarget;
+    closeOverlay('modalDeleteOverlay');
+    if (typeof onConfirm === 'function') await onConfirm();
+  },
 };
 
 /* ════════════════════════════════════════════
    MÓDULO DASHBOARD (stub)
 ════════════════════════════════════════════ */
 const DashboardModule = {
-    init() {
-        document.getElementById('pageContainer').innerHTML = `
+  init() {
+    document.getElementById('pageContainer').innerHTML = `
           <div class="page-header">
             <div>
               <h1 class="page-title">Dashboard</h1>
@@ -115,14 +121,15 @@ const DashboardModule = {
             <i class="bi bi-grid-1x2-fill" style="font-size:48px;opacity:.2"></i>
             <p class="mt-3 text-muted">Dashboard en construcción</p>
           </div>`;
-    },
+  },
 };
 
 /* ════════════════════════════════════════════
    BADGES DE SIDEBAR
 ════════════════════════════════════════════ */
 function updateBadges() {
-    setText('badge-usuarios', AppState.usuarios.length);
+  setText('badge-usuarios', AppState.usuarios.length);
+  setText('badge-herramientas', AppState.herramientas.length);
 }
 
 /* ════════════════════════════════════════════
@@ -131,36 +138,36 @@ function updateBadges() {
 // Mapa de página → código de permiso requerido. Si la página no aparece aquí,
 // se considera pública para usuarios autenticados (ej: dashboard).
 const PAGE_PERMISSIONS = {
-    usuarios: 'usuario.ver',
+  usuarios: 'usuario.ver',
 };
 
 function applySidebarVisibility() {
-    document.querySelectorAll('.nav-item[data-page]').forEach(el => {
-        const page = el.dataset.page;
-        const required = PAGE_PERMISSIONS[page];
-        if (!required) return;
-        if (Auth.hasPermission(required)) {
-            el.classList.remove('d-none');
-        } else {
-            el.classList.add('d-none');
-        }
-    });
+  document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+    const page = el.dataset.page;
+    const required = PAGE_PERMISSIONS[page];
+    if (!required) return;
+    if (Auth.hasPermission(required)) {
+      el.classList.remove('d-none');
+    } else {
+      el.classList.add('d-none');
+    }
+  });
 }
 
 /* ════════════════════════════════════════════
    SIDEBAR — USUARIO ACTUAL + LOGOUT
 ════════════════════════════════════════════ */
 function renderSidebarUser() {
-    const user = Auth.state.me?.user;
-    if (!user) return;
+  const user = Auth.state.me?.user;
+  if (!user) return;
 
-    const footer = document.querySelector('.sidebar-footer');
-    if (!footer) return;
+  const footer = document.querySelector('.sidebar-footer');
+  if (!footer) return;
 
-    const nombre = `${user.nombres} ${user.apellidos}`;
-    const rol    = user.rol_nombre ?? '';
+  const nombre = `${user.nombres} ${user.apellidos}`;
+  const rol = user.rol_nombre ?? '';
 
-    footer.innerHTML = `
+  footer.innerHTML = `
       <div class="d-flex align-items-center gap-2" style="overflow:hidden">
         <div class="avatar-xs" style="flex-shrink:0"><i class="bi bi-person-fill"></i></div>
         <div style="overflow:hidden;flex:1;min-width:0">
@@ -174,29 +181,29 @@ function renderSidebarUser() {
         </button>
       </div>`;
 
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        if (confirm('¿Cerrar sesión?')) Auth.forceLogout('Sesión cerrada correctamente.');
-    });
+  document.getElementById('btnLogout').addEventListener('click', () => {
+    if (confirm('¿Cerrar sesión?')) Auth.forceLogout('Sesión cerrada correctamente.');
+  });
 }
 
 /* ════════════════════════════════════════════
    ARRANQUE
 ════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
-    DeleteModal.render();
-    LoginOverlay.init();
-    Router.init();
+  DeleteModal.render();
+  LoginOverlay.init();
+  Router.init();
 
-    try {
-        await Auth.refresh();
-    } catch {
-        LoginOverlay.show();
-        return;
-    }
+  try {
+    await Auth.refresh();
+  } catch {
+    LoginOverlay.show();
+    return;
+  }
 
-    renderSidebarUser();
-    applySidebarVisibility();
+  renderSidebarUser();
+  applySidebarVisibility();
 
-    const initial = Auth.hasPermission('usuario.ver') ? 'usuarios' : 'dashboard';
-    Router.navigateTo(initial);
+  const initial = Auth.hasPermission('usuario.ver') ? 'usuarios' : 'dashboard';
+  Router.navigateTo(initial);
 });
