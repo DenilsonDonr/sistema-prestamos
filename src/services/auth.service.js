@@ -56,4 +56,48 @@ async function login(username, password) {
   return { user_id: user.id, rol_id: user.rol_id, rol_nombre: user.rol_nombre };
 }
 
-module.exports = { login };
+/**
+ * Devuelve el perfil del usuario autenticado y el listado de codigos de
+ * permisos que su rol tiene actualmente. Se usa por el frontend para
+ * conocer el estado real (rol, activo, permisos) tras cambios que pueden
+ * dejar el JWT desincronizado.
+ */
+async function getMe(userId) {
+  const [users] = await db.query(
+    `SELECT u.id, u.codigo, u.dni, u.nombres, u.apellidos,
+            u.username, u.email, u.telefono, u.activo,
+            u.rol_id, r.nombre AS rol_nombre,
+            u.cargo_id, u.area_id, u.turno_id
+     FROM usuarios u
+     JOIN roles r ON u.rol_id = r.id
+     WHERE u.id = ?`,
+    [userId]
+  );
+
+  if (!users.length) {
+    const e = new Error('Usuario no encontrado');
+    e.statusCode = 404; e.code = 'USER_NOT_FOUND'; throw e;
+  }
+
+  const user = users[0];
+
+  if (!user.activo) {
+    const e = new Error('Cuenta desactivada');
+    e.statusCode = 401; e.code = 'USER_INACTIVE'; throw e;
+  }
+
+  const [perms] = await db.query(
+    `SELECT p.codigo
+     FROM rol_permiso rp
+     JOIN permisos p ON rp.permiso_id = p.id
+     WHERE rp.rol_id = ?`,
+    [user.rol_id]
+  );
+
+  return {
+    user,
+    permisos: perms.map(p => p.codigo),
+  };
+}
+
+module.exports = { login, getMe };
