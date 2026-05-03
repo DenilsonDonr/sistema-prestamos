@@ -46,6 +46,29 @@ const Router = {
             return;
         }
 
+        // 0. Antes de navegar, refrescar el perfil para detectar cambios de
+        //    rol/activo aplicados por otro admin durante esta sesión.
+        try {
+            if (typeof Auth !== 'undefined' && Auth.state.loaded) {
+                await Auth.refresh();
+                if (typeof applySidebarVisibility === 'function') applySidebarVisibility();
+            }
+        } catch {
+            // Si /me falla (401, etc.) http() ya disparó forceLogout; abortamos.
+            return;
+        }
+
+        // Gate por permiso de página
+        const required = (typeof PAGE_PERMISSIONS !== 'undefined') ? PAGE_PERMISSIONS[page] : null;
+        if (required && typeof Auth !== 'undefined' && !Auth.hasPermission(required)) {
+            showToast('No tienes permisos para acceder a esa sección', 'error');
+            // Caer a una página segura. Dashboard se asume sin restricción.
+            if (page !== 'dashboard') {
+                return this.navigateTo('dashboard');
+            }
+            return;
+        }
+
         // 1. Actualizar sidebar
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');

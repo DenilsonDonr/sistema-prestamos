@@ -12,6 +12,27 @@
         href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="./css/styles.css" />
+
+    <!--
+      Script síncrono de auth-gate: corre ANTES del primer paint.
+      Si el token existe y no está expirado, añade has-token al <html>
+      para que CSS muestre el SPA y oculte el overlay inmediatamente.
+      Sin este script el navegador mostraría el SPA un instante antes
+      de que el JS asíncrono pueda mostrar el overlay de login.
+    -->
+    <script>
+        (function () {
+            try {
+                var token = localStorage.getItem('token');
+                if (token) {
+                    var payload = JSON.parse(atob(token.split('.')[1]));
+                    if (payload.exp && payload.exp * 1000 > Date.now()) {
+                        document.documentElement.classList.add('has-token');
+                    }
+                }
+            } catch (_) { /* token malformado: lo ignora, mostrará el login */ }
+        })();
+    </script>
 </head>
 
 <body>
@@ -91,10 +112,73 @@
 
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- ══════════════════════════════════════════
+       LOGIN OVERLAY — cubre toda la pantalla cuando
+       el usuario no está autenticado. Se muestra/oculta
+       en JS sin ninguna recarga de página.
+  ══════════════════════════════════════════ -->
+    <div id="loginOverlay" class="login-overlay">
+
+        <div class="bg-glow-overlay"></div>
+
+        <div class="login-card">
+            <div class="login-brand">
+                <div class="login-brand-icon"><i class="bi bi-cash-coin"></i></div>
+                <div>
+                    <div class="login-brand-name">PréstamoSys</div>
+                    <div class="login-brand-sub">Sistema de préstamo de herramientas</div>
+                </div>
+            </div>
+
+            <div class="login-title">Iniciar sesión</div>
+            <div class="login-subtitle">Ingresa tus credenciales para continuar</div>
+
+            <div class="login-alert" id="loginAlert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span id="loginAlertMsg"></span>
+            </div>
+
+            <form id="loginForm" novalidate>
+                <div class="form-group-login">
+                    <label class="login-label" for="loginUsername">Usuario</label>
+                    <div class="login-input-wrap">
+                        <i class="bi bi-person login-input-icon"></i>
+                        <input type="text" id="loginUsername" class="login-input"
+                            placeholder="Tu nombre de usuario"
+                            maxlength="50" autocomplete="username" />
+                    </div>
+                    <div class="login-field-error" id="err-loginUsername"></div>
+                </div>
+
+                <div class="form-group-login">
+                    <label class="login-label" for="loginPassword">Contraseña</label>
+                    <div class="login-input-wrap">
+                        <i class="bi bi-lock login-input-icon"></i>
+                        <input type="password" id="loginPassword" class="login-input"
+                            placeholder="Tu contraseña"
+                            maxlength="100" autocomplete="current-password" />
+                        <button type="button" id="btnTogglePassword" class="login-eye-btn" tabindex="-1">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <div class="login-field-error" id="err-loginPassword"></div>
+                </div>
+
+                <button type="submit" class="btn-login-submit" id="btnLogin">
+                    <span id="btnLoginContent"><i class="bi bi-box-arrow-in-right"></i> Ingresar</span>
+                    <span id="btnLoginSpinner" class="d-none"><div class="spinner-sm"></div></span>
+                </button>
+            </form>
+
+            <div class="login-footer-note">PréstamoSys v1.0 — Uso interno</div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Orden de carga: utilidades → router → módulos → arranque -->
+    <!-- Orden de carga: utilidades → login → router → módulos → arranque -->
     <script src="js/utils.js"></script>
+    <script src="js/modules/login.js"></script>
     <script src="js/router.js"></script>
     <script src="js/modules/usuarios.js"></script>
     <script src="js/app.js"></script>

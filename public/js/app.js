@@ -126,10 +126,77 @@ function updateBadges() {
 }
 
 /* ════════════════════════════════════════════
+   GATING DE NAVEGACIÓN POR PERMISOS
+════════════════════════════════════════════ */
+// Mapa de página → código de permiso requerido. Si la página no aparece aquí,
+// se considera pública para usuarios autenticados (ej: dashboard).
+const PAGE_PERMISSIONS = {
+    usuarios: 'usuario.ver',
+};
+
+function applySidebarVisibility() {
+    document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+        const page = el.dataset.page;
+        const required = PAGE_PERMISSIONS[page];
+        if (!required) return;
+        if (Auth.hasPermission(required)) {
+            el.classList.remove('d-none');
+        } else {
+            el.classList.add('d-none');
+        }
+    });
+}
+
+/* ════════════════════════════════════════════
+   SIDEBAR — USUARIO ACTUAL + LOGOUT
+════════════════════════════════════════════ */
+function renderSidebarUser() {
+    const user = Auth.state.me?.user;
+    if (!user) return;
+
+    const footer = document.querySelector('.sidebar-footer');
+    if (!footer) return;
+
+    const nombre = `${user.nombres} ${user.apellidos}`;
+    const rol    = user.rol_nombre ?? '';
+
+    footer.innerHTML = `
+      <div class="d-flex align-items-center gap-2" style="overflow:hidden">
+        <div class="avatar-xs" style="flex-shrink:0"><i class="bi bi-person-fill"></i></div>
+        <div style="overflow:hidden;flex:1;min-width:0">
+          <div class="fw-600 text-sm text-white text-truncate" title="${escapeHtml(nombre)}">${escapeHtml(nombre)}</div>
+          <div style="font-size:11px;color:#9ca3af;text-transform:capitalize">${escapeHtml(rol)}</div>
+        </div>
+        <button id="btnLogout" title="Cerrar sesión"
+          style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:17px;padding:4px;line-height:1;flex-shrink:0;transition:color .15s"
+          onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#6b7280'">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </div>`;
+
+    document.getElementById('btnLogout').addEventListener('click', () => {
+        if (confirm('¿Cerrar sesión?')) Auth.forceLogout('Sesión cerrada correctamente.');
+    });
+}
+
+/* ════════════════════════════════════════════
    ARRANQUE
 ════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     DeleteModal.render();
+    LoginOverlay.init();
     Router.init();
-    Router.navigateTo('usuarios');
+
+    try {
+        await Auth.refresh();
+    } catch {
+        LoginOverlay.show();
+        return;
+    }
+
+    renderSidebarUser();
+    applySidebarVisibility();
+
+    const initial = Auth.hasPermission('usuario.ver') ? 'usuarios' : 'dashboard';
+    Router.navigateTo(initial);
 });
