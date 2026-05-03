@@ -114,12 +114,63 @@ function validateCreateUser(body) {
 
 }
 
-// En actualizacion la password es opcional; se reutiliza la validacion base
+// En actualización: rol_id y password son opcionales.
+// rol_id puede no venir cuando el usuario edita su propia cuenta (self-edit),
+// porque el service bloquea el cambio de rol propio y el frontend no lo envía.
 function validateUpdateUser(body) {
-    const payload = validateCreateUser({ ...body, password: body.password ?? 'temporal' });
+    const {
+        rol_id,
+        codigo,
+        dni,
+        nombres,
+        apellidos,
+        cargo_id,
+        area_id,
+        turno_id,
+        telefono,
+        username,
+        password,
+        email,
+    } = body ?? {};
 
-    if (body?.password === undefined || body.password === null || body.password === '') {
-        delete payload.password;
+    if (typeof codigo !== 'string' || codigo.trim() === '') {
+        throw createValidationError('El campo codigo es requerido');
+    }
+    if (typeof nombres !== 'string' || nombres.trim() === '') {
+        throw createValidationError('El campo nombres es requerido');
+    }
+    if (typeof apellidos !== 'string' || apellidos.trim() === '') {
+        throw createValidationError('El campo apellidos es requerido');
+    }
+    if (typeof username !== 'string' || username.trim() === '') {
+        throw createValidationError('El campo username es requerido');
+    }
+
+    const payload = {
+        codigo: codigo.trim(),
+        dni: normalizeOptionalString(dni),
+        nombres: nombres.trim(),
+        apellidos: apellidos.trim(),
+        cargo_id: normalizeOptionalForeignKey(cargo_id, 'cargo_id'),
+        area_id: normalizeOptionalForeignKey(area_id, 'area_id'),
+        turno_id: normalizeOptionalForeignKey(turno_id, 'turno_id'),
+        telefono: normalizeOptionalString(telefono),
+        username: username.trim(),
+        email: normalizeOptionalString(email),
+    };
+
+    // rol_id opcional: si viene debe ser un entero positivo válido
+    if (rol_id !== undefined && rol_id !== null && rol_id !== '') {
+        const rolId = Number.parseInt(rol_id, 10);
+        if (!Number.isInteger(rolId) || rolId <= 0) {
+            throw createValidationError('El campo rol_id debe ser un entero positivo');
+        }
+        payload.rol_id = rolId;
+    }
+
+    // password opcional en actualización
+    if (password !== undefined && password !== null && password !== '') {
+        payload.password = password;
     }
 
     return payload;

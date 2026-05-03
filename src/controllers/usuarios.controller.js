@@ -11,7 +11,7 @@ const service = require('../services/usuarios.service');
 async function create(req, res, next) {
     try {
         const payload = validateCreateUser(req.body);
-        const result = await service.createUser(payload, req.user.id);
+        const result = await service.createUser(payload, req.user.user_id);
         res.status(201).json({ ok: true, data: result });
     } catch (err) {
         next(err);
@@ -65,7 +65,7 @@ async function update(req, res, next) {
     try {
         const id = parseUserId(req.params.id);
         const payload = validateUpdateUser(req.body);
-        const result = await service.updateUser(id, payload, req.user.id);
+        const result = await service.updateUser(id, payload, req.user.user_id);
         res.json({ ok: true, data: result });
     } catch (err) {
         next(err);
@@ -75,7 +75,7 @@ async function update(req, res, next) {
 async function deactivate(req, res, next) {
     try {
         const id = parseUserId(req.params.id);
-        const result = await service.deactivateUser(id, req.user.id);
+        const result = await service.deactivateUser(id, req.user.user_id);
         res.json({ ok: true, data: result });
     } catch (err) {
         next(err);
@@ -85,7 +85,7 @@ async function deactivate(req, res, next) {
 async function activate(req, res, next) {
     try {
         const id = parseUserId(req.params.id);
-        const result = await service.activateUser(id, req.user.id);
+        const result = await service.activateUser(id, req.user.user_id);
         res.json({ ok: true, data: result });
     } catch (err) {
         next(err);
