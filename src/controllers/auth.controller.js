@@ -19,4 +19,17 @@ async function login(req, res, next) {
   }
 }
 
-module.exports = { login };
+/**
+ * GET /api/auth/me
+ * Devuelve el perfil + permisos vigentes del usuario autenticado.
+ */
+async function me(req, res, next) {
+  try {
+    const data = await authService.getMe(req.user.user_id);
+    res.status(200).json({ ok: true, data });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { login, me };
