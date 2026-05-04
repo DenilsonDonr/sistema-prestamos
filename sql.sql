@@ -32,7 +32,7 @@ CREATE TABLE rol_permiso (
 
 CREATE TABLE areas (
     id int PRIMARY KEY AUTO_INCREMENT,
-    nombre varchar(100) UNIQUE NOT NULL COMMENT 'soldadura, mantenimiento, almacÃ©n',
+    nombre varchar(100) UNIQUE NOT NULL COMMENT 'soldadura, mantenimiento, almacén',
     descripcion varchar(255),
     activo boolean DEFAULT true,
     usuario_modifica_id int,
@@ -42,7 +42,7 @@ CREATE TABLE areas (
 
 CREATE TABLE turnos (
     id int PRIMARY KEY AUTO_INCREMENT,
-    nombre varchar(50) UNIQUE NOT NULL COMMENT 'maÃ±ana, tarde, noche',
+    nombre varchar(50) UNIQUE NOT NULL COMMENT 'mañana, tarde, noche',
     hora_inicio time,
     hora_fin time,
     activo boolean DEFAULT true,
@@ -82,7 +82,7 @@ CREATE TABLE modelos (
 
 CREATE TABLE tipos_herramienta (
     id int PRIMARY KEY AUTO_INCREMENT,
-    nombre varchar(50) UNIQUE NOT NULL COMMENT 'manual, elÃ©ctrica, neumÃ¡tica',
+    nombre varchar(50) UNIQUE NOT NULL COMMENT 'manual, eléctrica, neumática',
     activo boolean DEFAULT true,
     usuario_modifica_id int,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -112,7 +112,7 @@ CREATE TABLE estados_herramienta (
 
 CREATE TABLE motivos_baja (
     id int PRIMARY KEY AUTO_INCREMENT,
-    nombre varchar(100) UNIQUE NOT NULL COMMENT 'extravÃ­o, rotura, obsolescencia, robo',
+    nombre varchar(100) UNIQUE NOT NULL COMMENT 'extravío, rotura, obsolescencia, robo',
     descripcion varchar(255),
     activo boolean DEFAULT true,
     usuario_modifica_id int,
@@ -122,7 +122,7 @@ CREATE TABLE motivos_baja (
 
 CREATE TABLE tipos_alerta (
     id int PRIMARY KEY AUTO_INCREMENT,
-    nombre varchar(100) UNIQUE NOT NULL COMMENT 'devolucion_vencida, stock_bajo, herramienta_daÃ±ada, prestamos_repetidos',
+    nombre varchar(100) UNIQUE NOT NULL COMMENT 'devolucion_vencida, stock_bajo, herramienta_dañada, prestamos_repetidos',
     descripcion varchar(255),
     activo boolean DEFAULT true,
     usuario_modifica_id int,
@@ -133,7 +133,7 @@ CREATE TABLE tipos_alerta (
 CREATE TABLE usuarios (
     id int PRIMARY KEY AUTO_INCREMENT,
     rol_id int NOT NULL,
-    codigo varchar(20) UNIQUE NOT NULL COMMENT 'cÃ³digo interno de la empresa',
+    codigo varchar(20) UNIQUE NOT NULL COMMENT 'código interno de la empresa',
     dni varchar(20) UNIQUE,
     nombres varchar(100) NOT NULL,
     apellidos varchar(100) NOT NULL,
@@ -146,7 +146,7 @@ CREATE TABLE usuarios (
     email varchar(100) UNIQUE,
     ultimo_acceso TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo boolean DEFAULT true,
-    usuario_modifica_id int COMMENT 'auto-referencia: quiÃ©n editÃ³ este usuario',
+    usuario_modifica_id int COMMENT 'auto-referencia: quién editó este usuario',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -171,7 +171,7 @@ CREATE TABLE compras (
     codigo varchar(20) UNIQUE NOT NULL COMMENT 'ej: COMP-0001',
     proveedor_id int NOT NULL,
     usuario_registra_id int NOT NULL,
-    numero_documento varchar(50) COMMENT 'nÃºmero de factura o boleta',
+    numero_documento varchar(50) COMMENT 'número de factura o boleta',
     fecha_compra date NOT NULL,
     subtotal decimal(12, 2) DEFAULT 0,
     igv decimal(12, 2) DEFAULT 0,
@@ -214,7 +214,7 @@ CREATE TABLE unidades_herramienta (
     id int PRIMARY KEY AUTO_INCREMENT,
     herramienta_id int NOT NULL,
     codigo_unidad varchar(30) UNIQUE NOT NULL,
-    numero_serie varchar(50) UNIQUE COMMENT 'nÃºmero de serie del fabricante, si aplica',
+    numero_serie varchar(50) UNIQUE COMMENT 'número de serie del fabricante, si aplica',
     estado_id int NOT NULL,
     compra_id int,
     fecha_ingreso date NOT NULL,
@@ -229,7 +229,7 @@ CREATE TABLE prestamos (
     codigo varchar(20) UNIQUE NOT NULL COMMENT 'ej: PRE-0001',
     usuario_solicita_id int NOT NULL,
     usuario_registra_id int NOT NULL,
-    area_uso_id int COMMENT 'Ã¡rea donde se usarÃ¡ la herramienta',
+    area_uso_id int COMMENT 'área donde se usará la herramienta',
     fecha_salida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_retorno_estimada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     motivo text COMMENT 'trabajo asignado',
@@ -277,7 +277,7 @@ CREATE TABLE bajas (
     motivo_baja_id int NOT NULL,
     usuario_registra_id int NOT NULL,
     fecha_baja date NOT NULL,
-    descripcion text COMMENT 'detalle del motivo especÃ­fico',
+    descripcion text COMMENT 'detalle del motivo específico',
     usuario_modifica_id int,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
