@@ -22,6 +22,16 @@ async function createUser(payload, userId) {
   const [u2] = await db.query('SELECT id FROM usuarios WHERE codigo = ?', [codigo]);
   if (u2.length) throw error(409, 'CODIGO_EXISTS', 'Código ya existe');
 
+  if (dni) {
+    const [u3] = await db.query('SELECT id FROM usuarios WHERE dni = ?', [dni]);
+    if (u3.length) throw error(409, 'DNI_EXISTS', 'DNI ya registrado');
+  }
+
+  if (email) {
+    const [u4] = await db.query('SELECT id FROM usuarios WHERE email = ?', [email]);
+    if (u4.length) throw error(409, 'EMAIL_EXISTS', 'Email ya registrado');
+  }
+
   const hash = await bcrypt.hash(password, 10);
 
   const [res] = await db.query(
