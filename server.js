@@ -3,6 +3,7 @@
 const env = require('./src/config/env');
 const db = require('./src/config/db');
 const app = require('./src/app');
+const bootstrap = require('./scripts/bootstrap');
 
 async function start() {
   try {
@@ -10,11 +11,13 @@ async function start() {
     conn.release();
     console.log('[db] Pool conectado correctamente');
 
+    await bootstrap();
+
     app.listen(env.port, () => {
       console.log(`[server] Corriendo en http://localhost:${env.port} (${env.nodeEnv})`);
     });
   } catch (err) {
-    console.error('[db] No se pudo conectar a la base de datos:', err.message);
+    console.error('[startup] Error al inicializar el servidor:', err.message);
     process.exit(1);
   }
 }

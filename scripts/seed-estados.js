@@ -78,11 +78,17 @@ async function seed() {
     console.log('[seed-estados] Seed completado correctamente.');
   } catch (err) {
     await conn.rollback();
-    console.error('[seed-estados] Error — se hizo rollback:', err.message);
-    process.exit(1);
+    throw err;
   } finally {
     await conn.end();
   }
 }
 
-seed();
+module.exports = seed;
+
+if (require.main === module) {
+  seed().catch((err) => {
+    console.error('[seed-estados] Error — se hizo rollback:', err.message);
+    process.exit(1);
+  });
+}
