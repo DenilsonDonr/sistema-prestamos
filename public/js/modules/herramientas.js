@@ -341,9 +341,8 @@ const HerramientasModule = {
             await http(`/api/unidades/${unidadId}`, 'PUT', body);
             showToast('Estado actualizado correctamente', 'success');
             closeOverlay('modalEditEstadoOverlay');
-            // Recargar la lista de unidades sin cerrar el panel
             await this._loadUnidades(this._unidadesHerramientaId);
-            // Refrescar stock en la tabla principal (cambia disponible si va a malo)
+            AppState._ts.herramientas = 0;
             await this.load();
         } catch (e) {
             showToast(e.message, 'error');
@@ -433,6 +432,7 @@ const HerramientasModule = {
                 try {
                     await http(`/api/herramientas/${id}`, 'DELETE');
                     showToast(`"${name}" desactivada`, 'success');
+                    AppState._ts.herramientas = 0;
                     await this.load();
                 } catch (e) { showToast(e.message, 'error'); }
             });
@@ -441,6 +441,7 @@ const HerramientasModule = {
                 try {
                     await http(`/api/herramientas/${id}`, 'PUT', { activo: true });
                     showToast(`"${name}" activada`, 'success');
+                    AppState._ts.herramientas = 0;
                     await this.load();
                 } catch (e) { showToast(e.message, 'error'); }
             });
@@ -471,6 +472,7 @@ const HerramientasModule = {
             );
             showToast(`Herramienta ${isEdit ? 'actualizada' : 'creada'} correctamente`, 'success');
             closeOverlay('modalHerramientaOverlay');
+            AppState._ts.herramientas = 0;
             await this.load();
         } catch (e) {
             showToast(e.message, 'error');
