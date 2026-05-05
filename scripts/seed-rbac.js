@@ -66,6 +66,7 @@ const ROL_PERMISOS = {
     'alerta.ver',
   ],
   trabajador: [
+    'catalogo.ver',
     'herramienta.ver',
     'unidad.ver',
     'prestamo.ver',
