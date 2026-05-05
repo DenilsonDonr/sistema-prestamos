@@ -251,5 +251,5 @@ node scripts/seed-catalogos-herramientas.js
 
 ## Autor
 
-**Denilson** — Proyecto de instituto  
+**Denilson y Hugo** — Proyecto de instituto  
 Repositorio: [github.com/DenilsonDonr/sistema-prestamos](https://github.com/DenilsonDonr/sistema-prestamos)
