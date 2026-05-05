@@ -20,36 +20,53 @@ function _estadoDescFallback(nombre) {
 const HerramientasModule = {
 
     _lista: [],
-    // herramienta actualmente abierta en el panel de unidades
     _unidadesHerramientaId: null,
 
-    async init() {
-        const pendientes = [];
+    _canCreate()     { return Auth.hasPermission('herramienta.crear'); },
+    _canEdit()       { return Auth.hasPermission('herramienta.editar'); },
+    _canDeactivate() { return Auth.hasPermission('herramienta.eliminar'); },
 
+    _applyPermissions() {
+        document.querySelectorAll('[data-perm]').forEach(el => {
+            if (!Auth.hasPermission(el.dataset.perm)) el.classList.add('d-none');
+        });
+    },
+
+    async init() {
+        this._applyPermissions();
+
+        const pendientes = [];
+        const canMutate = this._canCreate() || this._canEdit();
+
+        // tipos: siempre, lo usa el filtro de la tabla
         if (!AppState.tiposHerramienta.length)
             pendientes.push(
                 http('/api/catalogos/tipos-herramienta')
                     .then(r => { AppState.tiposHerramienta = r.data; })
                     .catch(() => {})
             );
-        if (!AppState.marcas.length)
-            pendientes.push(
-                http('/api/catalogos/marcas')
-                    .then(r => { AppState.marcas = r.data; })
-                    .catch(() => {})
-            );
-        if (!AppState.ubicaciones.length)
-            pendientes.push(
-                http('/api/catalogos/ubicaciones')
-                    .then(r => { AppState.ubicaciones = r.data; })
-                    .catch(() => {})
-            );
-        if (!AppState.estadosHerramienta.length)
-            pendientes.push(
-                http('/api/catalogos/estados-herramienta')
-                    .then(r => { AppState.estadosHerramienta = r.data; })
-                    .catch(() => {})
-            );
+
+        // marcas, ubicaciones y estados: solo los necesita el formulario crear/editar
+        if (canMutate) {
+            if (!AppState.marcas.length)
+                pendientes.push(
+                    http('/api/catalogos/marcas')
+                        .then(r => { AppState.marcas = r.data; })
+                        .catch(() => {})
+                );
+            if (!AppState.ubicaciones.length)
+                pendientes.push(
+                    http('/api/catalogos/ubicaciones')
+                        .then(r => { AppState.ubicaciones = r.data; })
+                        .catch(() => {})
+                );
+            if (!AppState.estadosHerramienta.length)
+                pendientes.push(
+                    http('/api/catalogos/estados-herramienta')
+                        .then(r => { AppState.estadosHerramienta = r.data; })
+                        .catch(() => {})
+                );
+        }
 
         await Promise.all(pendientes);
 
@@ -94,6 +111,9 @@ const HerramientasModule = {
             return;
         }
 
+        const canEdit       = this._canEdit();
+        const canDeactivate = this._canDeactivate();
+
         tbody.innerHTML = lista.map(h => {
             const isActive = !!h.activo;
 
@@ -108,17 +128,26 @@ const HerramientasModule = {
                 h.modelo_nombre ? escapeHtml(h.modelo_nombre) : null,
             ].filter(Boolean).join(' / ') || '<span class="text-muted">—</span>';
 
-            const toggleBtn = isActive
-                ? `<button class="btn-action" title="Desactivar"
-                     onclick="HerramientasModule.toggleActivo(${h.id},true,'${escapeHtml(h.nombre)}')"
-                     style="color:#ef4444">
-                     <i class="bi bi-toggle-on" style="font-size:17px"></i>
+            const editBtn = canEdit
+                ? `<button class="btn-action btn-action-edit"
+                     onclick="HerramientasModule.openEdit(${h.id})" title="Editar">
+                     <i class="bi bi-pencil-fill"></i>
                    </button>`
-                : `<button class="btn-action" title="Activar"
-                     onclick="HerramientasModule.toggleActivo(${h.id},false,'${escapeHtml(h.nombre)}')"
-                     style="color:#16a34a">
-                     <i class="bi bi-toggle-off" style="font-size:17px"></i>
-                   </button>`;
+                : '';
+
+            const toggleBtn = canDeactivate
+                ? (isActive
+                    ? `<button class="btn-action" title="Desactivar"
+                         onclick="HerramientasModule.toggleActivo(${h.id},true,'${escapeHtml(h.nombre)}')"
+                         style="color:#ef4444">
+                         <i class="bi bi-toggle-on" style="font-size:17px"></i>
+                       </button>`
+                    : `<button class="btn-action" title="Activar"
+                         onclick="HerramientasModule.toggleActivo(${h.id},false,'${escapeHtml(h.nombre)}')"
+                         style="color:#16a34a">
+                         <i class="bi bi-toggle-off" style="font-size:17px"></i>
+                       </button>`)
+                : '';
 
             return `
       <tr>
@@ -143,15 +172,12 @@ const HerramientasModule = {
               : '<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--text-muted)"><i class="bi bi-circle-fill" style="font-size:7px"></i>Inactivo</span>'}
         </td>
         <td style="white-space:nowrap">
-          <button class="btn-action" title="Ver y gestionar unidades físicas"
+          <button class="btn-action" title="Ver unidades físicas"
             onclick="HerramientasModule.openUnidades(${h.id},'${escapeHtml(h.nombre)}')"
             style="color:var(--primary)">
             <i class="bi bi-boxes"></i>
           </button>
-          <button class="btn-action btn-action-edit"
-            onclick="HerramientasModule.openEdit(${h.id})" title="Editar">
-            <i class="bi bi-pencil-fill"></i>
-          </button>
+          ${editBtn}
           ${toggleBtn}
         </td>
       </tr>`;
@@ -235,6 +261,8 @@ const HerramientasModule = {
             return;
         }
 
+        const canEdit = this._canEdit();
+
         const rows = unidades.map(u => {
             const color = u.estado_color || '#6b7280';
             return `
@@ -255,12 +283,12 @@ const HerramientasModule = {
             title="${u.observaciones ? escapeHtml(u.observaciones) : ''}">
             ${u.observaciones ? escapeHtml(u.observaciones) : '<span class="text-muted">—</span>'}
           </td>
-          <td>
+          ${canEdit ? `<td>
             <button class="btn-action btn-action-edit" title="Cambiar estado"
               onclick="HerramientasModule.openEditEstado(${u.id},'${escapeHtml(u.codigo_unidad)}',${u.estado_id},'${escapeHtml(u.observaciones ?? '')}')">
               <i class="bi bi-pencil-fill"></i>
             </button>
-          </td>
+          </td>` : '<td></td>'}
         </tr>`;
         }).join('');
 
@@ -323,6 +351,10 @@ const HerramientasModule = {
     },
 
     async _saveEstado() {
+        if (!this._canEdit()) {
+            showToast('No tienes permisos para cambiar estados de unidades', 'error');
+            return;
+        }
         const unidadId = document.getElementById('editEstadoUnidadId').value;
         const estadoId = parseInt(document.getElementById('editEstadoSelect').value);
         const obs      = document.getElementById('editEstadoObs').value.trim();
@@ -418,6 +450,10 @@ const HerramientasModule = {
     },
 
     async openEdit(id) {
+        if (!this._canEdit()) {
+            showToast('No tienes permisos para editar herramientas', 'error');
+            return;
+        }
         try {
             const { data } = await http(`/api/herramientas/${id}`);
             await this._openModal('edit', data);
@@ -427,6 +463,10 @@ const HerramientasModule = {
     },
 
     toggleActivo(id, isCurrentlyActive, name) {
+        if (!this._canDeactivate()) {
+            showToast('No tienes permisos para cambiar el estado de herramientas', 'error');
+            return;
+        }
         if (isCurrentlyActive) {
             DeleteModal.open('desactivar-herramienta', id, name, async () => {
                 try {
@@ -453,6 +493,15 @@ const HerramientasModule = {
 
         const id     = document.getElementById('herramientaId').value;
         const isEdit = !!id;
+
+        if (isEdit && !this._canEdit()) {
+            showToast('No tienes permisos para editar herramientas', 'error');
+            return;
+        }
+        if (!isEdit && !this._canCreate()) {
+            showToast('No tienes permisos para crear herramientas', 'error');
+            return;
+        }
         const body   = {
             nombre:       document.getElementById('hNombre').value.trim(),
             descripcion:  document.getElementById('hDescripcion').value.trim() || null,
@@ -495,7 +544,13 @@ const HerramientasModule = {
     /* ── Listeners ───────────────────────── */
     _bindEvents() {
         // Herramienta form
-        document.getElementById('btnNuevaHerramienta')?.addEventListener('click',        () => this._openModal('new'));
+        document.getElementById('btnNuevaHerramienta')?.addEventListener('click', () => {
+            if (!this._canCreate()) {
+                showToast('No tienes permisos para crear herramientas', 'error');
+                return;
+            }
+            this._openModal('new');
+        });
         document.getElementById('btnSaveHerramienta')?.addEventListener('click',         () => this._save());
         document.getElementById('btnCancelHerramienta')?.addEventListener('click',       () => closeOverlay('modalHerramientaOverlay'));
         document.getElementById('btnCloseModalHerramienta')?.addEventListener('click',   () => closeOverlay('modalHerramientaOverlay'));

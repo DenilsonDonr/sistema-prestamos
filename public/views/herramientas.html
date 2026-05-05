@@ -3,7 +3,7 @@
     <h1 class="page-title">Herramientas</h1>
     <p class="page-subtitle">Inventario de herramientas del sistema</p>
   </div>
-  <button class="btn-primary-action" id="btnNuevaHerramienta">
+  <button class="btn-primary-action" id="btnNuevaHerramienta" data-perm="herramienta.crear">
     <i class="bi bi-plus-lg"></i> Nueva Herramienta
   </button>
 </div>
@@ -89,7 +89,7 @@
 
     <div class="modal-body-custom" style="overflow-y:auto;max-height:65vh">
 
-      <div class="info-banner mb-3">
+      <div class="info-banner mb-3" data-perm="herramienta.editar">
         <i class="bi bi-info-circle-fill"></i>
         <span>
           Las unidades se crean automáticamente al registrar una <strong>compra</strong>.
