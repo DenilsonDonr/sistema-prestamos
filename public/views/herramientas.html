@@ -1,0 +1,264 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Herramientas</h1>
+    <p class="page-subtitle">Inventario de herramientas del sistema</p>
+  </div>
+  <button class="btn-primary-action" id="btnNuevaHerramienta" data-perm="herramienta.crear">
+    <i class="bi bi-plus-lg"></i> Nueva Herramienta
+  </button>
+</div>
+
+<div class="search-bar-row">
+  <div class="search-input-wrap">
+    <i class="bi bi-search search-icon"></i>
+    <input type="text" id="searchHerramienta" class="search-input"
+      placeholder="Buscar por nombre o código…" />
+  </div>
+  <select id="filterTipo" class="filter-select">
+    <option value="">Todos los tipos</option>
+  </select>
+  <select id="filterActivoH" class="filter-select">
+    <option value="">Todos</option>
+    <option value="true">Activos</option>
+    <option value="false">Inactivos</option>
+  </select>
+  <button class="btn-icon-outline" id="btnRefreshHerramientas" title="Recargar">
+    <i class="bi bi-arrow-clockwise"></i>
+  </button>
+</div>
+
+<div class="card-panel">
+  <div class="table-responsive">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Marca / Modelo</th>
+          <th>Ubicación</th>
+          <th>
+            Stock disponible
+            <i class="bi bi-info-circle" style="font-size:11px;opacity:.5;cursor:default"
+              title="Unidades en estado bueno o regular que no están prestadas en este momento"></i>
+          </th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="bodyHerramientas">
+        <tr>
+          <td colspan="8" class="text-center py-5">
+            <div class="spinner-custom"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-footer" style="flex-wrap:wrap;gap:10px">
+    <span class="text-muted text-sm" id="totalHerramientasLabel">Cargando…</span>
+    <div class="stock-legend">
+      <span class="stock-legend-item">
+        <span style="width:8px;height:8px;border-radius:50%;background:#16a34a;display:inline-block"></span>
+        Por encima del mínimo
+      </span>
+      <span class="stock-legend-item">
+        <span style="width:8px;height:8px;border-radius:50%;background:#d97706;display:inline-block"></span>
+        En o bajo el mínimo
+      </span>
+      <span class="stock-legend-item">
+        <span style="width:8px;height:8px;border-radius:50%;background:#dc2626;display:inline-block"></span>
+        Sin unidades disponibles
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL UNIDADES ══ -->
+<div class="modal-overlay" id="modalUnidadesOverlay">
+  <div class="modal-panel" style="max-width:720px">
+    <div class="modal-header-custom">
+      <div>
+        <div class="modal-title-custom" id="modalUnidadesTitle">Unidades</div>
+        <div class="modal-subtitle"    id="modalUnidadesSubtitle"></div>
+      </div>
+      <button class="btn-modal-close" id="btnCloseModalUnidades">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body-custom" style="overflow-y:auto;max-height:65vh">
+
+      <div class="info-banner mb-3" data-perm="herramienta.editar">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>
+          Las unidades se crean automáticamente al registrar una <strong>compra</strong>.
+          Desde aquí puedes cambiar el estado de cada pieza física si llega dañada o se deteriora con el uso.
+          Solo las unidades en estado <strong>bueno</strong> o <strong>regular</strong> cuentan como stock disponible para préstamos.
+        </span>
+      </div>
+
+      <div id="unidadesContent">
+        <div class="d-flex justify-content-center py-5">
+          <div class="spinner-custom"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer-custom" style="flex-wrap:wrap;gap:10px">
+      <div class="stock-legend me-auto" id="unidadesEstadoLegend">
+        <!-- se rellena dinámicamente desde AppState.estadosHerramienta -->
+      </div>
+      <span class="text-muted text-sm" id="totalUnidadesLabel"></span>
+      <button class="btn-cancel" id="btnCloseUnidadesFooter">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL EDITAR ESTADO DE UNIDAD ══ -->
+<div class="modal-overlay" id="modalEditEstadoOverlay">
+  <div class="modal-panel modal-sm">
+    <div class="modal-header-custom">
+      <div>
+        <div class="modal-title-custom">Cambiar estado</div>
+        <div class="modal-subtitle" id="editEstadoSubtitle"></div>
+      </div>
+      <button class="btn-modal-close" id="btnCloseEditEstado">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body-custom">
+      <input type="hidden" id="editEstadoUnidadId" />
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label-custom">Estado <span class="required">*</span></label>
+          <select id="editEstadoSelect" class="input-custom">
+            <option value="">— Seleccionar —</option>
+          </select>
+          <div class="field-error" id="err-editEstado"></div>
+          <p class="field-hint" id="editEstadoHint">
+            <i class="bi bi-info-circle"></i>
+            <span>Los estados disponibles se cargan desde el catálogo del sistema.</span>
+          </p>
+        </div>
+        <div class="col-12">
+          <label class="form-label-custom">Observaciones</label>
+          <textarea id="editEstadoObs" class="input-custom" rows="2"
+            placeholder="Describe la condición actual, el daño observado, etc." maxlength="255"></textarea>
+          <p class="field-hint">
+            <i class="bi bi-pencil"></i>
+            <span>Recomendado cuando el estado es <strong>regular</strong> o <strong>malo</strong> — ayuda a identificar qué le pasa a la pieza.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button class="btn-cancel" id="btnCancelEditEstado">Cancelar</button>
+      <button class="btn-save"   id="btnSaveEditEstado">
+        <span id="btnSaveEditEstadoText"><i class="bi bi-check-lg me-1"></i> Guardar</span>
+        <span id="btnSaveEditEstadoSpinner" class="d-none"><div class="spinner-sm"></div></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL HERRAMIENTA ══ -->
+<div class="modal-overlay" id="modalHerramientaOverlay">
+  <div class="modal-panel">
+    <div class="modal-header-custom">
+      <div>
+        <div class="modal-title-custom" id="modalHerramientaTitle">Nueva Herramienta</div>
+        <div class="modal-subtitle"    id="modalHerramientaSubtitle">Completa los campos del formulario</div>
+      </div>
+      <button class="btn-modal-close" id="btnCloseModalHerramienta">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body-custom">
+      <form id="formHerramienta" novalidate>
+        <input type="hidden" id="herramientaId" />
+        <div class="row g-3">
+
+          <!-- Nombre -->
+          <div class="col-12">
+            <label class="form-label-custom">Nombre <span class="required">*</span></label>
+            <input type="text" id="hNombre" class="input-custom"
+              placeholder="Ej: Taladro percutor" maxlength="150" required />
+            <div class="field-error" id="err-hNombre"></div>
+          </div>
+
+          <!-- Descripción -->
+          <div class="col-12">
+            <label class="form-label-custom">Descripción</label>
+            <textarea id="hDescripcion" class="input-custom" rows="2"
+              placeholder="Descripción opcional…" maxlength="500"></textarea>
+          </div>
+
+          <!-- Tipo -->
+          <div class="col-md-6">
+            <label class="form-label-custom">Tipo <span class="required">*</span></label>
+            <select id="hTipo" class="input-custom" required>
+              <option value="">— Seleccionar tipo —</option>
+            </select>
+            <div class="field-error" id="err-hTipo"></div>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="col-md-6">
+            <label class="form-label-custom">Ubicación <span class="required">*</span></label>
+            <select id="hUbicacion" class="input-custom" required>
+              <option value="">— Seleccionar ubicación —</option>
+            </select>
+            <div class="field-error" id="err-hUbicacion"></div>
+          </div>
+
+          <!-- Marca -->
+          <div class="col-md-6">
+            <label class="form-label-custom">Marca <span class="required">*</span></label>
+            <select id="hMarca" class="input-custom" required>
+              <option value="">— Seleccionar marca —</option>
+            </select>
+            <div class="field-error" id="err-hMarca"></div>
+          </div>
+
+          <!-- Modelo (depende de Marca) -->
+          <div class="col-md-6">
+            <label class="form-label-custom">Modelo <span class="required">*</span></label>
+            <select id="hModelo" class="input-custom" required disabled>
+              <option value="">— Selecciona una marca primero —</option>
+            </select>
+            <div class="field-error" id="err-hModelo"></div>
+          </div>
+
+          <!-- Stock mínimo -->
+          <div class="col-md-6">
+            <label class="form-label-custom">
+              Stock mínimo
+              <i class="bi bi-info-circle" style="font-size:11px;opacity:.5;cursor:default"
+                title="Cuando el stock disponible llegue a este número o menos, el sistema mostrará una alerta de stock bajo"></i>
+            </label>
+            <input type="number" id="hStockMinimo" class="input-custom"
+              placeholder="0" min="0" value="0" />
+            <div class="field-error" id="err-hStockMinimo"></div>
+            <p class="field-hint">
+              <i class="bi bi-bell"></i>
+              Se genera una alerta cuando el stock disponible es igual o menor a este valor. Usa 0 para desactivar las alertas de stock bajo.
+            </p>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button class="btn-cancel" id="btnCancelHerramienta">Cancelar</button>
+      <button class="btn-save"   id="btnSaveHerramienta">
+        <span id="btnSaveHerramientaText"><i class="bi bi-check-lg me-1"></i> Guardar</span>
+        <span id="btnSaveHerramientaSpinner" class="d-none"><div class="spinner-sm"></div></span>
+      </button>
+    </div>
+  </div>
+</div>

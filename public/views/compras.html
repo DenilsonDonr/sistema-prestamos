@@ -1,0 +1,179 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Compras</h1>
+    <p class="page-subtitle">Registro de compras a proveedores</p>
+  </div>
+  <button class="btn-primary-action" id="btnNuevaCompra">
+    <i class="bi bi-plus-lg"></i> Nueva Compra
+  </button>
+</div>
+
+<div class="search-bar-row">
+  <div class="search-input-wrap">
+    <i class="bi bi-search search-icon"></i>
+    <input type="text" id="searchCompra" class="search-input"
+      placeholder="Buscar por código o número de documento…" />
+  </div>
+  <select id="filterEstadoCompra" class="filter-select">
+    <option value="">Todas</option>
+    <option value="activa">Activas</option>
+    <option value="anulada">Anuladas</option>
+  </select>
+  <button class="btn-icon-outline" id="btnRefreshCompras" title="Recargar">
+    <i class="bi bi-arrow-clockwise"></i>
+  </button>
+</div>
+
+<div class="card-panel">
+  <div class="table-responsive">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Proveedor</th>
+          <th>Fecha</th>
+          <th>N° Documento</th>
+          <th style="text-align:right">Subtotal</th>
+          <th style="text-align:right">IGV</th>
+          <th style="text-align:right">Total</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="bodyCompras">
+        <tr>
+          <td colspan="9" class="text-center py-5">
+            <div class="spinner-custom"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-footer">
+    <span class="text-muted text-sm" id="totalComprasLabel">Cargando…</span>
+  </div>
+</div>
+
+<!-- ══ MODAL NUEVA COMPRA (formulario) ══ -->
+<div class="modal-overlay" id="modalCompraFormOverlay">
+  <div class="modal-panel" style="max-width:820px">
+    <div class="modal-header-custom">
+      <div>
+        <div class="modal-title-custom">Nueva Compra</div>
+        <div class="modal-subtitle">Cabecera y líneas de detalle</div>
+      </div>
+      <button class="btn-modal-close" id="btnCloseCompraForm">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body-custom" style="overflow-y:auto;max-height:65vh">
+      <form id="formCompra" novalidate>
+
+        <!-- ─ Cabecera ─ -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label-custom">Proveedor <span class="required">*</span></label>
+            <select id="cProveedor" class="input-custom" required>
+              <option value="">— Seleccionar proveedor —</option>
+            </select>
+            <div class="field-error" id="err-cProveedor"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Fecha de compra <span class="required">*</span></label>
+            <input type="date" id="cFecha" class="input-custom" required />
+            <div class="field-error" id="err-cFecha"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">N° Documento</label>
+            <input type="text" id="cNumDoc" class="input-custom"
+              placeholder="Ej: F001-00123" maxlength="50" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Observaciones</label>
+            <input type="text" id="cObservaciones" class="input-custom"
+              placeholder="Opcional…" maxlength="255" />
+          </div>
+        </div>
+
+        <!-- ─ Líneas de detalle ─ -->
+        <div style="border-top:1px solid var(--border);padding-top:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span style="font-size:13px;font-weight:600">Líneas de detalle</span>
+            <button type="button" class="btn-icon-outline" id="btnAddLinea" style="width:auto;height:auto;font-size:12px;padding:5px 12px;gap:6px;white-space:nowrap">
+              <i class="bi bi-plus-lg"></i> Agregar línea
+            </button>
+          </div>
+
+          <div class="field-error" id="err-detalle" style="margin-bottom:8px"></div>
+
+          <div class="table-responsive">
+            <table class="table-custom" id="tablaDetalle">
+              <thead>
+                <tr>
+                  <th>Herramienta</th>
+                  <th style="width:90px">Cant.</th>
+                  <th style="width:130px">Precio unit.</th>
+                  <th style="width:110px;text-align:right">Subtotal</th>
+                  <th style="width:40px"></th>
+                </tr>
+              </thead>
+              <tbody id="bodyDetalle">
+                <!-- líneas dinámicas -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Totales -->
+          <div style="display:flex;justify-content:flex-end;margin-top:12px">
+            <table style="font-size:13px;border-collapse:collapse">
+              <tr>
+                <td style="padding:3px 12px;color:var(--text-muted);text-align:right">Subtotal</td>
+                <td style="padding:3px 0;font-family:'DM Mono',monospace;text-align:right;min-width:100px" id="resumenSubtotal">S/ 0.00</td>
+              </tr>
+              <tr>
+                <td style="padding:3px 12px;color:var(--text-muted);text-align:right">IGV (18%)</td>
+                <td style="padding:3px 0;font-family:'DM Mono',monospace;text-align:right" id="resumenIgv">S/ 0.00</td>
+              </tr>
+              <tr style="border-top:1px solid var(--border)">
+                <td style="padding:6px 12px;font-weight:700;text-align:right">Total</td>
+                <td style="padding:6px 0;font-family:'DM Mono',monospace;font-weight:700;font-size:15px;text-align:right" id="resumenTotal">S/ 0.00</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button class="btn-cancel" id="btnCancelCompraForm">Cancelar</button>
+      <button class="btn-save"   id="btnSaveCompra">
+        <span id="btnSaveCompraText"><i class="bi bi-check-lg me-1"></i> Registrar compra</span>
+        <span id="btnSaveCompraSpinner" class="d-none"><div class="spinner-sm"></div></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DETALLE COMPRA (vista) ══ -->
+<div class="modal-overlay" id="modalCompraDetalleOverlay">
+  <div class="modal-panel" style="max-width:720px">
+    <div class="modal-header-custom">
+      <div>
+        <div class="modal-title-custom" id="modalDetalleTitle">Compra</div>
+        <div class="modal-subtitle"    id="modalDetalleSubtitle"></div>
+      </div>
+      <button class="btn-modal-close" id="btnCloseCompraDetalle">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body-custom" style="overflow-y:auto;max-height:65vh" id="modalDetalleBody">
+    </div>
+
+    <div class="modal-footer-custom" id="modalDetalleFooter">
+      <button class="btn-cancel" id="btnCloseCompraDetalleFooter">Cerrar</button>
+    </div>
+  </div>
+</div>

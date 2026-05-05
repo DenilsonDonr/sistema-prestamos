@@ -1,0 +1,203 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Usuarios</h1>
+    <p class="page-subtitle">Administra los usuarios del sistema</p>
+  </div>
+  <button class="btn-primary-action" id="btnNuevoUsuario" data-perm="usuario.crear">
+    <i class="bi bi-plus-lg"></i> Nuevo Usuario
+  </button>
+</div>
+
+<!-- ══ AVISO DE REGLAS DEL MÓDULO ══════════
+     Las reglas críticas que el usuario debe conocer antes de operar.
+     Se mantiene visible para que no haya sorpresas al editar el propio
+     registro o el rol de otros administradores.
+═══════════════════════════════════════════ -->
+<div class="rules-bar" id="rulesBarUsuarios">
+  <div class="rules-bar-icon"><i class="bi bi-shield-lock-fill"></i></div>
+  <div class="rules-bar-body">
+    <div class="rules-bar-title">Reglas de seguridad de este módulo</div>
+    <ul class="rules-bar-list">
+      <li>No puedes <strong>cambiar tu propio rol</strong>. Pídele a otro administrador que lo haga.</li>
+      <li>No puedes <strong>desactivar tu propia cuenta</strong>.</li>
+      <li>No se puede dejar al sistema sin <strong>al menos un administrador activo</strong>.</li>
+      <li>Cambiar la <strong>contraseña propia</strong> cierra tu sesión actual por seguridad.</li>
+      <li>Los usuarios <strong>nunca se eliminan</strong>; se desactivan para preservar el historial.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="search-bar-row">
+  <div class="search-input-wrap">
+    <i class="bi bi-search search-icon"></i>
+    <input type="text" id="searchUsuario" class="search-input"
+      placeholder="Buscar por nombre, usuario, código, DNI…" />
+  </div>
+  <select id="filterRol" class="filter-select">
+    <option value="">Todos los roles</option>
+  </select>
+  <select id="filterActivo" class="filter-select">
+    <option value="">Todos</option>
+    <option value="true">Activos</option>
+    <option value="false">Inactivos</option>
+  </select>
+  <button class="btn-icon-outline" id="btnRefreshUsuarios" title="Recargar">
+    <i class="bi bi-arrow-clockwise"></i>
+  </button>
+</div>
+
+<div class="card-panel">
+  <div class="table-responsive">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Código</th>
+          <th>DNI</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="bodyUsuarios">
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <div class="spinner-custom"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-footer">
+    <span class="text-muted text-sm" id="totalUsuariosLabel">Cargando…</span>
+  </div>
+</div>
+
+<!-- ══ MODAL USUARIO ══ -->
+<div class="modal-overlay" id="modalUsuarioOverlay">
+  <div class="modal-panel">
+    <div class="modal-header-custom">
+      <div>
+        <div class="modal-title-custom" id="modalUsuarioTitle">Nuevo Usuario</div>
+        <div class="modal-subtitle"    id="modalUsuarioSubtitle">Completa los campos del formulario</div>
+      </div>
+      <button class="btn-modal-close" id="btnCloseModalUsuario">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body-custom">
+
+      <!-- Aviso contextual cuando el usuario edita su propio registro -->
+      <div class="self-edit-notice d-none" id="selfEditNotice">
+        <i class="bi bi-info-circle-fill"></i>
+        <div>
+          <strong>Estás editando tu propia cuenta.</strong>
+          El campo <em>Rol</em> está bloqueado. Si cambias tu contraseña, se cerrará tu sesión.
+        </div>
+      </div>
+
+      <!-- Aviso al intentar cambiar el rol del último admin activo -->
+      <div class="last-admin-notice d-none" id="lastAdminNotice">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div>
+          <strong>Este es el único administrador activo.</strong>
+          No puedes cambiar su rol ni desactivarlo sin antes promover a otro usuario.
+        </div>
+      </div>
+
+      <form id="formUsuario" novalidate>
+        <input type="hidden" id="usuarioId" />
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label-custom">Nombres <span class="required">*</span></label>
+            <input type="text" id="uNombres" class="input-custom" placeholder="Ej: Juan Carlos" maxlength="100" required />
+            <div class="field-error" id="err-uNombres"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Apellidos <span class="required">*</span></label>
+            <input type="text" id="uApellidos" class="input-custom" placeholder="Ej: García López" maxlength="100" required />
+            <div class="field-error" id="err-uApellidos"></div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label-custom">Código interno <span class="required">*</span></label>
+            <input type="text" id="uCodigo" class="input-custom" placeholder="Ej: EMP-001" maxlength="20" required />
+            <div class="field-error" id="err-uCodigo"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">DNI</label>
+            <input type="text" id="uDni" class="input-custom" placeholder="Ej: 12345678" maxlength="20" inputmode="numeric" />
+            <div class="field-error" id="err-uDni"></div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label-custom" id="labelRol">
+              Rol <span class="required">*</span>
+              <span class="lock-hint d-none" id="rolLockHint">
+                <i class="bi bi-lock-fill"></i> bloqueado
+              </span>
+            </label>
+            <select id="uRol" class="input-custom" required>
+              <option value="">— Seleccionar rol —</option>
+            </select>
+            <div class="field-error" id="err-uRol"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Username <span class="required">*</span></label>
+            <input type="text" id="uUsername" class="input-custom" placeholder="Ej: jgarcia" maxlength="50" required />
+            <div class="field-error" id="err-uUsername"></div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label-custom" id="labelPassword">Contraseña <span class="required">*</span></label>
+            <input type="password" id="uPassword" class="input-custom" placeholder="Mínimo 8 caracteres" maxlength="100" />
+            <div class="field-hint" id="hintPassword">Mínimo 8 caracteres. Cambiar la propia contraseña cerrará tu sesión.</div>
+            <div class="field-error" id="err-uPassword"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Email</label>
+            <input type="email" id="uEmail" class="input-custom" placeholder="Ej: jgarcia@empresa.com" maxlength="100" />
+            <div class="field-error" id="err-uEmail"></div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label-custom">Cargo</label>
+            <select id="uCargo" class="input-custom">
+              <option value="">— Sin cargo —</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">Área</label>
+            <select id="uArea" class="input-custom">
+              <option value="">— Sin área —</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">Turno</label>
+            <select id="uTurno" class="input-custom">
+              <option value="">— Sin turno —</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label-custom">Teléfono</label>
+            <input type="text" id="uTelefono" class="input-custom" placeholder="Ej: 987654321" maxlength="20" />
+            <div class="field-error" id="err-uTelefono"></div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer-custom">
+      <button class="btn-cancel" id="btnCancelUsuario">Cancelar</button>
+      <button class="btn-save" id="btnSaveUsuario">
+        <span id="btnSaveUsuarioText"><i class="bi bi-check-lg me-1"></i> Guardar</span>
+        <span id="btnSaveUsuarioSpinner" class="d-none"><div class="spinner-sm"></div></span>
+      </button>
+    </div>
+  </div>
+</div>
