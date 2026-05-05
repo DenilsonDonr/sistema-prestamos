@@ -371,6 +371,7 @@ const ComprasModule = {
             try {
                 await http(`/api/compras/${id}/anular`, 'POST');
                 showToast(`Compra ${codigo} anulada`, 'success');
+                AppState._ts.compras = 0;
                 await this.load();
             } catch (e) {
                 showToast(e.message, 'error');
@@ -399,6 +400,7 @@ const ComprasModule = {
             const { data } = await http('/api/compras', 'POST', body);
             showToast(`Compra ${data.codigo} registrada — ${data.detalle.length} línea(s) procesadas`, 'success');
             closeOverlay('modalCompraFormOverlay');
+            AppState._ts.compras = 0;
             await this.load();
         } catch (e) {
             showToast(e.message, 'error');

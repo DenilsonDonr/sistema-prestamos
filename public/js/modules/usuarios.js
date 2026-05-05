@@ -326,6 +326,7 @@ const UsuariosModule = {
                 try {
                     await http(`/api/usuarios/${id}`, 'DELETE');
                     showToast(`"${name}" desactivado`, 'success');
+                    AppState._ts.usuarios = 0;
                     await this.load();
                 } catch (e) { showToast(e.message, 'error'); }
             });
@@ -334,6 +335,7 @@ const UsuariosModule = {
                 try {
                     await http(`/api/usuarios/${id}/activate`, 'PATCH');
                     showToast(`"${name}" activado`, 'success');
+                    AppState._ts.usuarios = 0;
                     await this.load();
                 } catch (e) { showToast(e.message, 'error'); }
             });
@@ -388,9 +390,9 @@ const UsuariosModule = {
             showToast(`Usuario ${isEdit ? 'actualizado' : 'creado'} correctamente`, 'success');
             closeOverlay('modalUsuarioOverlay');
 
-            // Si edité a alguien (no a mí) sus permisos pudieron cambiar; refresco mi sesión.
             if (!isSelf) await Auth.refresh().catch(() => {});
 
+            AppState._ts.usuarios = 0;
             await this.load();
         } catch (e) {
             // Mapeo de códigos de error a mensajes amigables
