@@ -52,12 +52,22 @@ const UsuariosModule = {
     },
 
     async load() {
+        const CACHE_TTL = 30_000;
+        const cached = AppState.usuarios.length && (Date.now() - (AppState._ts.usuarios ?? 0)) < CACHE_TTL;
+
+        if (cached) {
+            this._render(this._applyFilters(AppState.usuarios));
+            this._populateFilterRol();
+            return;
+        }
+
         document.getElementById('bodyUsuarios').innerHTML =
             `<tr><td colspan="7" class="text-center py-5"><div class="spinner-custom"></div></td></tr>`;
 
         try {
             const res = await http('/api/usuarios?limit=100');
             AppState.usuarios = res.data.data ?? res.data;
+            AppState._ts.usuarios = Date.now();
             this._render(this._applyFilters(AppState.usuarios));
             this._populateFilterRol();
             updateBadges();

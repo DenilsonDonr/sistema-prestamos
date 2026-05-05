@@ -22,6 +22,8 @@ const AppState = {
   compras: [],
   proveedores: [],
   deleteTarget: { type: null, id: null, name: null, onConfirm: null },
+  // timestamps de última carga (ms). Usados por los módulos para el TTL de caché.
+  _ts: {},
 };
 
 /* ════════════════════════════════════════════
@@ -135,13 +137,44 @@ function updateBadges() {
   setText('badge-compras', AppState.compras.length);
 }
 
+// Precarga los tres contadores en paralelo al arranque para que los badges
+// muestren valores reales sin esperar a que el usuario navegue a cada sección.
+// Se ejecuta fire-and-forget; los módulos usarán el cache si aún es fresco.
+async function preloadBadges() {
+  const now = Date.now();
+  const tasks = [];
+
+  if (Auth.hasPermission(PAGE_PERMISSIONS.usuarios))
+    tasks.push(http('/api/usuarios?limit=100').then(r => {
+      AppState.usuarios = r.data.data ?? r.data;
+      AppState._ts.usuarios = now;
+    }).catch(() => {}));
+
+  if (Auth.hasPermission(PAGE_PERMISSIONS.herramientas))
+    tasks.push(http('/api/herramientas').then(r => {
+      AppState.herramientas = r.data ?? r;
+      AppState._ts.herramientas = now;
+    }).catch(() => {}));
+
+  if (Auth.hasPermission(PAGE_PERMISSIONS.compras))
+    tasks.push(http('/api/compras').then(r => {
+      AppState.compras = r.data ?? r;
+      AppState._ts.compras = now;
+    }).catch(() => {}));
+
+  await Promise.all(tasks);
+  updateBadges();
+}
+
 /* ════════════════════════════════════════════
    GATING DE NAVEGACIÓN POR PERMISOS
 ════════════════════════════════════════════ */
 // Mapa de página → código de permiso requerido. Si la página no aparece aquí,
 // se considera pública para usuarios autenticados (ej: dashboard).
 const PAGE_PERMISSIONS = {
-  usuarios: 'usuario.ver',
+  usuarios:     'usuario.ver',
+  herramientas: 'herramienta.ver',
+  compras:      'compra.ver',
 };
 
 function applySidebarVisibility() {
@@ -206,6 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderSidebarUser();
   applySidebarVisibility();
+  preloadBadges(); // fire & forget — llena badges sin bloquear la navegación
 
   const initial = Auth.hasPermission('usuario.ver') ? 'usuarios' : 'dashboard';
   Router.navigateTo(initial);

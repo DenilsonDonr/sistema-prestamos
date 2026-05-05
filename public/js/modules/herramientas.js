@@ -59,6 +59,15 @@ const HerramientasModule = {
     },
 
     async load() {
+        const CACHE_TTL = 30_000;
+        const cached = AppState.herramientas.length && (Date.now() - (AppState._ts.herramientas ?? 0)) < CACHE_TTL;
+
+        if (cached) {
+            this._lista = AppState.herramientas;
+            this._applyFilters();
+            return;
+        }
+
         document.getElementById('bodyHerramientas').innerHTML =
             `<tr><td colspan="8" class="text-center py-5"><div class="spinner-custom"></div></td></tr>`;
 
@@ -66,6 +75,7 @@ const HerramientasModule = {
             const res = await http('/api/herramientas');
             this._lista = res.data ?? res;
             AppState.herramientas = this._lista;
+            AppState._ts.herramientas = Date.now();
             this._applyFilters();
             updateBadges();
         } catch (e) {

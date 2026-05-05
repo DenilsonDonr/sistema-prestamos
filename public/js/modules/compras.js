@@ -33,6 +33,15 @@ const ComprasModule = {
     },
 
     async load() {
+        const CACHE_TTL = 30_000;
+        const cached = AppState.compras.length && (Date.now() - (AppState._ts.compras ?? 0)) < CACHE_TTL;
+
+        if (cached) {
+            this._lista = AppState.compras;
+            this._applyFilters();
+            return;
+        }
+
         document.getElementById('bodyCompras').innerHTML =
             `<tr><td colspan="9" class="text-center py-5"><div class="spinner-custom"></div></td></tr>`;
 
@@ -40,6 +49,7 @@ const ComprasModule = {
             const res = await http('/api/compras');
             this._lista = res.data ?? res;
             AppState.compras = this._lista;
+            AppState._ts.compras = Date.now();
             this._applyFilters();
             updateBadges();
         } catch (e) {
